@@ -1,0 +1,7 @@
+^\.github$
+^docs$
+^_pkgdown\.yml$
+^\.gitignore$
+^knockofftools\.Rproj$
+^LICENSE$
+^README\.md$
