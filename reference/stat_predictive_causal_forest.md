@@ -1,0 +1,106 @@
+# Causal forest based knockoff (feature) statistics that captues the predictive strength: Difference from importance scores derived by causal forest
+
+This filter presented in Sechidis et al. (2021).
+
+## Usage
+
+``` r
+stat_predictive_causal_forest(X, X_k, y, trt, type = "regression", ...)
+```
+
+## Arguments
+
+- X:
+
+  original data.frame (or tibble) with "numeric" and "factor" columns
+  only. The number of columns, ncol(X) needs to be \> 2.
+
+- X_k:
+
+  knockoff data.frame (or tibble) with "numeric" and "factor" columns
+  only obtained e.g. by X_k = knockoff(X). The dimensions and column
+  classes must match those of the original X.
+
+- y:
+
+  response vector with `length(y) = nrow(X)`. Accepts "numeric"
+  (type="regression") or binary "factor" (type="classification"). Can
+  also be a survival object of class "Surv" (type="survival") as
+  obtained from y = survival::Surv(time, status).
+
+- trt:
+
+  a binary treatment indicator variable (should be numeric with 0/1
+  entries)
+
+- type:
+
+  should be "regression" if y is numeric, "classification" if y is a
+  binary factor variable or "survival" if y is a survival object.
+
+- ...:
+
+  additional parameters passed to grf::causal_forest (for type =
+  "regression" and "classification) and causal_survival_forest (for type
+  = "survival")
+
+## Value
+
+data.frame with knockoff statistics W as column that capture the
+predictive strength of the variables. The number of rows matches the
+number of columns (variables) of the data.frame X and the variable names
+are recorded in rownames(W).
+
+## Details
+
+If there are factor covariates with multiple levels among columns of X
+then there will be more columns in model.matrix than in the
+corresponding data.frame (both for original X and its knockoff X_k). In
+this case, let W_j be the difference between the two sums derived by the
+variable importance (VI) scores associated with covariate j. I.e. if
+j-th variable is factor with K levels then W_j is: sum(\|VI_j,1\|, ... ,
+\|VI_j,K\|) - sum(\|VI_j1\|, ..., \|VI_j,K\|).
+
+Sechidis, K., Kormaksson, M., & Ohlssen, D. (2021). Using knockoffs for
+controlled predictive biomarker identification. Statistics in Medicine,
+40(25), 5453-5473.
+
+## Examples
+
+``` r
+library(knockofftools)
+
+set.seed(1)
+
+# Simulate 10 Gaussian covariate predictors and 1 factor with 4 levels:
+X <- generate_X(n=500, p=10, p_b=0, cov_type="cov_diag", rho=0.2)
+X$X11 <- factor(sample(c("A","B","C","D"), nrow(X), replace=TRUE))
+
+ # Calculate the knockoff copy of X:
+X_k <- knockoff(X)
+
+# Generate a binary treatment variable
+trt = sample(c(1,0), nrow(X), replace=TRUE)
+
+# Simulate a fixed "treatment" effect:
+X.fixed <- data.frame(SEX = factor(sample(c("male", "female"), nrow(X), replace=TRUE)), trt = trt)
+penalty.fixed = rep(0, length(X.fixed))
+
+# create linear predictor with first 3 beta-coefficients = 1 (all other zero) and a treatment effect of size 1
+lp <- X.fixed$trt+ as.numeric(X.fixed$SEX == 'male') + (X$X1 + X$X2 + X$X3) + (X$X4 + as.integer(X$X11=='A'))*trt
+
+# Gaussian
+
+# Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):
+y <- lp + rnorm(nrow(X))
+
+W <- stat_predictive_causal_forest(X=X, X_k=X_k, y=y, trt=trt, type="regression")
+
+# Cox
+
+# Simulate from Weibull hazard with with baseline hazard h0(t) = lambda*rho*t^(rho-1)
+# and linear predictor lp:
+y <- simulWeib(N=nrow(X), lambda0=0.01, rho=1, lp=lp)
+
+W <- stat_predictive_causal_forest(X=X, X_k=X_k, y=y, trt=trt, type="survival")
+```
