@@ -1,0 +1,15 @@
+# R session files
+.Rhistory
+.Rdata
+.RData
+.Ruserdata
+.Rproj.user
+
+# Built vignettes
+inst/doc
+
+# macOS
+.DS_Store
+
+# pkgdown site
+docs/
