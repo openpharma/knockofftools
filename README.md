@@ -19,7 +19,7 @@ To invoke the R-package in development mode: please clone the repository, set it
 In the vignette folder we provide various example use cases of the knockofftools. 
 
 ## References 
-Knockoff tools is introduced in [Zimmermann et al. 2024)](https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.3211).
+The `knockofftools` package is introduced in [Zimmermann et al. 2024)](https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.3211).
 
 Furthermore, details of the novel implemented methods can be found in the following papers:
 
