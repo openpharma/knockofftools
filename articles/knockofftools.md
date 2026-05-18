@@ -11,40 +11,50 @@ selections.
 Let’s first recall how the knockoff variable selection methodology works
 in a nutshell:
 
-1.  Simulate a knockoff copy $\widetilde{X}$ of the original covariates
-    data $X$.
-2.  Compute feature statistics
-    $W_{j} = \left| \beta_{j} \right| - \left| {\widetilde{\beta}}_{j} \right|$
-    from an aggregated regression of $Y$ on $X$ and $\widetilde{X}$.
-    Large, positive statistics $W_{j}$ indicate association of $X_{j}$
-    with $Y$.
-3.  For FDR control use the *knockoffs$+$* procedure to select variables
-    $j$ that fulfill $W_{j} \geq \tau_{+}$ where
-    $$\tau_{+} = \operatorname{argmin}\limits_{t > 0}\left\{ \frac{1 + \left| \{ j:W_{j} \leq t\} \right|}{\left| \{ j:W_{j} \leq t\} \right|} \leq q \right\}.$$
+1.  Simulate a knockoff copy $`\tilde{X}`$ of the original covariates
+    data $`X`$.
+2.  Compute feature statistics $`W_j=|\beta_j|-|\tilde{\beta}_j|`$ from
+    an aggregated regression of $`Y`$ on $`X`$ and $`\tilde{X}`$. Large,
+    positive statistics $`W_j`$ indicate association of $`X_j`$ with
+    $`Y`$.
+3.  For FDR control use the *knockoffs$`+`$* procedure to select
+    variables $`j`$ that fulfill $`W_j \geq \tau_+`$ where
+    ``` math
+    \tau_+ = \underset{t>0}{\operatorname{argmin}} \left\{\frac{1 + |\{j : W_j \leq t\}|}{|\{j : W_j \leq t\}|} \leq q\right\}.
+    ```
     This workflow selects variables associated with response with
-    guaranteed control of false discovery rate $FDR \leq q$.
+    guaranteed control of false discovery rate $`FDR \leq q`$.
 
 ``` r
+
 library(knockofftools)
 ```
 
 ## Data generation
 
 In this section we will simulate a toy data set with a known truth. In
-particular, we will simulate a set of covariates $X$ and a response $y$
-that is associated with some of the $X$’s through a regression model.
+particular, we will simulate a set of covariates $`X`$ and a response
+$`y`$ that is associated with some of the $`X`$’s through a regression
+model.
 
-*Simulation of $X$:* The `generate_X` function simulates the rows of an
-$n \times p$ data frame $X$ independently from a multivariate Gaussian
-distribution with mean $0$ and $p \times p$ covariance matrix
-$$\Sigma_{ij} = \left\{ \begin{array}{lr}
-{1\{ i = j\},} & \text{Independent,} \\
-{\rho^{1\{ i \neq j\}},} & \text{Equicorrelated,} \\
-{\rho^{|i - j|},} & {\text{AR1},}
-\end{array} \right.$$ where $p_{b}$ randomly selected columns are then
-dichotomized with the indicator function $\delta(x) = 1(x > 0)$.
+*Simulation of $`X`$:* The `generate_X` function simulates the rows of
+an $`n \times p`$ data frame $`X`$ independently from a multivariate
+Gaussian distribution with mean $`0`$ and $`p \times p`$ covariance
+matrix
+``` math
+\Sigma_{ij} = \left \{
+\begin{array}{lr}
+1\{i = j\}, & \text{Independent,} \\
+\rho^{1\{i \neq j\}}, & \text{Equicorrelated,} \\
+\rho^{|i-j|}, & \text{AR1},
+\end{array}
+\right.
+```
+where $`p_b`$ randomly selected columns are then dichotomized with the
+indicator function $`\delta(x)=1(x > 0)`$.
 
 ``` r
+
 # Generate a 2000 x 30 Gaussian data.frame under equi-correlation(rho=0.5) structure, 
 # with 10 of the columns dichotomized
 set.seed(1)
@@ -56,15 +66,18 @@ correlation coefficient with `rho`. Each column of the resulting
 data.frame is either of class `"numeric"` (for the continuous columns)
 or `"factor"` (for the binary columns).
 
-*Simulation of $y|X$:* The `generate_y` function simulates a response
-$y$ from the (sparse) regression model
-$$y = X\beta + \varepsilon,{\mspace{6mu}\text{where}\mspace{6mu}}\varepsilon \sim N\left( 0,I_{n} \right),$$
+*Simulation of $`y|X`$:* The `generate_y` function simulates a response
+$`y`$ from the (sparse) regression model
+``` math
+y = X \beta + \varepsilon, \textrm{ where } \varepsilon \sim N(0,I_n),
+```
 where the first `p_nn` regression coefficients are non-zero, all other
 are set to zero. The (common) amplitude of the non-zero regression
-coefficients is specified with `a`. Here we generate $y$ that is
-associated with the first 10 covariates, each with amplitude $a = 0.1$.
+coefficients is specified with `a`. Here we generate $`y`$ that is
+associated with the first 10 covariates, each with amplitude $`a=0.1`$.
 
 ``` r
+
 # Generate y ~ N(X%*%beta,I_n) where first 10 beta-coefficients are = a, all other = 0.
 y <- generate_y(X = X, p_nn=10, a=0.1)
 ```
@@ -81,6 +94,7 @@ categorical predictors. The output is a data.frame (or tibble)
 corresponding to the knockoff copy of `X`:
 
 ``` r
+
 # Simulate sequential knockoff of X:
 Xk <- knockoff(X)
 ```
@@ -97,6 +111,7 @@ sequentially.
 This function only works on data frames with all “numeric” columns.
 
 ``` r
+
 # Generate a 2000 x 30 Gaussian data.frame under equi-correlation(rho=0.5) structure, 
 X <- generate_X(n=2000, p=30, p_b=0, cov_type = "cov_equi", rho=0.5)
 # Simulate second order multivariate Gaussian MX knockoff:
@@ -112,18 +127,21 @@ knockoff filter workflow. These will now be discussed below.
 
 The function `knockoff.statistics` takes as main input `y`, `X`, and
 `type` (defaults to `type="regression"`) and then proceeds to 1)
-simulate independently `M` knockoffs ${\widetilde{X}}_{k}$,
-$k = 1,\ldots,M$, 2) fit an aggregated regression model:
-$$\begin{array}{r}
-{Y = X\beta^{(k)} + {\widetilde{X}}_{k}{\widetilde{\beta}}^{(k)} + \varepsilon,}
-\end{array}$$ for each of the $k = 1,\ldots,M$ knockoff copies. Then
-finally calculate (for each knockoff $k$) the corresponding knockoff
-(feature) statistics
-$W_{j}^{(k)} = \left| \beta_{j}^{(k)} \right| - \left| {\widetilde{\beta}}_{j}^{(k)} \right|$.
-By changing the `M` parameter of `knockoff.statistics` we can calculate
+simulate independently `M` knockoffs $`\tilde{X}_k`$, $`k=1,\dots,M`$,
+2) fit an aggregated regression model:
+``` math
+\begin{align}
+Y = X \beta^{(k)} + \tilde{X}_k \tilde{\beta}^{(k)} + \varepsilon,
+\end{align}
+```
+for each of the $`k=1,\dots,M`$ knockoff copies. Then finally calculate
+(for each knockoff $`k`$) the corresponding knockoff (feature)
+statistics $`W^{(k)}_j = |\beta_j^{(k)}|-|\tilde{\beta}_j^{(k)}|`$. By
+changing the `M` parameter of `knockoff.statistics` we can calculate
 multiple knockoff statistics in parallel:
 
 ``` r
+
 set.seed(123)
 X <- generate_X(n=2000, p=30, p_b=0, cov_type = "cov_ar1", rho=0.5)
 y <- generate_y(X = X, p_nn=10, 0.1)
@@ -152,17 +170,18 @@ the `error.type="fdr"` (default), `"pfer"` (per family error error), or
 level.
 
 ``` r
+
 S = variable.selections(W, level = 0.1, error.type="fdr")
 head(S$selected)
 #>    S1 S2 S3 S4 S5 S6 S7 S8 S9 S10
-#> X1  1  1  1  1  1  1  1  1  1   1
-#> X2  1  1  1  1  1  1  1  1  1   1
-#> X3  1  1  1  1  1  1  1  1  1   1
-#> X4  1  1  1  1  1  1  1  1  1   1
-#> X5  1  1  1  1  1  1  1  1  1   1
-#> X6  1  1  1  1  1  1  1  1  1   1
+#> X1  1  1  0  0  1  1  1  1  1   0
+#> X2  1  1  0  0  1  1  1  1  1   0
+#> X3  1  1  0  0  1  1  1  1  1   0
+#> X4  1  1  0  0  1  1  1  1  1   0
+#> X5  1  1  0  0  1  1  1  1  1   0
+#> X6  1  1  0  0  1  1  1  1  1   0
 S$stable.variables
-#>  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X9"  "X10" "X12" "X20"
+#>  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X9"  "X10" "X20"
 ```
 
 In a nutshell the function will both calculate individual variable
@@ -183,6 +202,7 @@ we can visualize a heatmap of the selections across the knockoff
 replicates.
 
 ``` r
+
 plot(S)
 ```
 
@@ -200,29 +220,29 @@ that should tend towards the top of the heatmap.
 algorithm for selecting stable variables from multiple independent
 knockoff variable selections.
 
-Let ${\widetilde{X}}_{1},\ldots,{\widetilde{X}}_{B}$ denote $B$
-independent knockoff copies of $X$. For each knockoff copy $b$ run the
-knockoff filter and select the set of influential variables,
-$S_{b} \subseteq \{ 1,\ldots,p\}$. We propose the following heuristics
-to select a final set of variables:
+Let $`\tilde{X}_1, \dots, \tilde{X}_B`$ denote $`B`$ independent
+knockoff copies of $`X`$. For each knockoff copy $`b`$ run the knockoff
+filter and select the set of influential variables,
+$`S_b \subseteq \{1,\dots,p\}`$. We propose the following heuristics to
+select a final set of variables:
 
-- Let $F(r) \subseteq \{ 1,\ldots,p\}$, where
-  $r \in \lbrack 0.5,1\rbrack$, denote the set of variables selected
-  more than $r \cdot B$ times out of the $B$ knockoff draws.
+- Let $`F(r) \subseteq \{1,\dots,p\}`$, where $`r \in [0.5, 1]`$, denote
+  the set of variables selected more than $`r \cdot B`$ times out of the
+  $`B`$ knockoff draws.
 - Let \$S(r)=\underset{b}{\rm mode}\\F(r) \cap S_b\\\$ denote the set of
   selected variables that appears most frequently, after filtering out
-  variables that are not in $F(r)$.
-- Return $\widehat{S} = S\left( \widehat{r} \right)$, where
-  $\widehat{r} = \operatorname{argmax}\limits_{r \geq 0.5}\left| S(r) \right|$,
-  i.e. the largest set among $\{ S(r):r \geq 0.5\}$.
+  variables that are not in $`F(r)`$.
+- Return $`\hat{S} = S(\hat{r})`$, where
+  $`\hat{r} = \underset{r \geq 0.5}{\operatorname{argmax}} |{S(r)}|`$,
+  i.e. the largest set among $`\{S(r):r \geq 0.5\}`$.
 
 The first step above essentially filters out variables that don’t appear
-more than $(100 \cdot r)\%$ of the time, which would seem like a
-reasonable requirement in practice (e.g. with $r = 0.5$). The second
-step above then filters the $B$ knockoff selections $S_{b}$ accordingly
-and searches for the most frequent variable set among those. The third
-step then establishes the final selection, namely the most liberal
-variable selection among the sets $\{ S(r):r \geq 0.5\}$.
+more than $`(100\cdot r)\%`$ of the time, which would seem like a
+reasonable requirement in practice (e.g. with $`r=0.5`$). The second
+step above then filters the $`B`$ knockoff selections $`S_b`$
+accordingly and searches for the most frequent variable set among those.
+The third step then establishes the final selection, namely the most
+liberal variable selection among the sets $`\{S(r):r \geq 0.5\}`$.
 
 ## References
 

@@ -34,5 +34,5 @@ Electronic Journal of Statistics, 10(1), 960-975.
 ``` r
 W <- rnorm(100)
 selections_control_PFER(W, level=2)
-#> [1] 91 71 54
+#> [1] 51 72 79 29
 ```

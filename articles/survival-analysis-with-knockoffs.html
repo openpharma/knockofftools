@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Survival analysis with knockoffs • knockofftools</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Survival analysis with knockoffs">
 </head>
@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Matthias
 Kormaksson, Kostas Sechidis</h4>
             
-            <h4 data-toc-skip class="date">April 13, 2026</h4>
+            <h4 data-toc-skip class="date">May 18, 2026</h4>
       
 
       <div class="d-none name"><code>survival-analysis-with-knockoffs.Rmd</code></div>
@@ -76,16 +76,16 @@ Kormaksson, Kostas Sechidis</h4>
 in the context of censored time-to-event data. We consider the following
 Cox regression model for knockoff variable selection for time-to-event
 data:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>λ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mi>β</mi><mo>+</mo><mover><mi>X</mi><mo accent="true">̃</mo></mover><mover><mi>β</mi><mo accent="true">̃</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mi>β</mi><mo>+</mo><mover><mi>X</mi><mo accent="true">̃</mo></mover><mover><mi>β</mi><mo accent="true">̃</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
 \lambda(t) = \lambda_0(t) \exp \left(X \beta + \tilde{X} \tilde{\beta} \right),
 \end{align}</annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\lambda(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda(t)</annotation></semantics></math>
 is the hazard function corresponding to a censored time-to-event
 response
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\lambda_0(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda_0(t)</annotation></semantics></math>
 is the baseline hazard. The matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 is the design matrix corresponding to the covariates of interest, while
@@ -100,7 +100,7 @@ steps:</p>
 of the original covariates data
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>.</li>
 <li>Compute feature statistics
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>j</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo>−</mo><mrow><mo stretchy="true" form="prefix">|</mo><msub><mover><mi>β</mi><mo accent="true">̃</mo></mover><mi>j</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">W_j=|\beta_j|-|\tilde{\beta}_j|</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>j</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>−</mi><mo stretchy="false" form="prefix">|</mo><msub><mover><mi>β</mi><mo accent="true">̃</mo></mover><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">W_j=|\beta_j|-|\tilde{\beta}_j|</annotation></semantics></math>
 from the aggregated Cox regression with covariates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 and
@@ -111,13 +111,13 @@ indicate effect of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>j</mi></msub><annotation encoding="application/x-tex">X_j</annotation></semantics></math>
 on hazard rate.</li>
 <li>For FDR control use the
-<em>knockoffs<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>+</mo><annotation encoding="application/x-tex">+</annotation></semantics></math></em>
+<em>knockoffs<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math></em>
 procedure to select variables
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
 that fulfill
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>j</mi></msub><mo>≥</mo><msub><mi>τ</mi><mo>+</mo></msub></mrow><annotation encoding="application/x-tex">W_j \geq \tau_+</annotation></semantics></math>
 where
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mo>+</mo></msub><mo>=</mo><munder><mo>argmin</mo><mrow><mi>t</mi><mo>&gt;</mo><mn>0</mn></mrow></munder><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">|</mo><mo stretchy="false" form="prefix">{</mo><mi>j</mi><mo>:</mo><msub><mi>W</mi><mi>j</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">|</mo><mo stretchy="false" form="prefix">{</mo><mi>j</mi><mo>:</mo><msub><mi>W</mi><mi>j</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">|</mo></mrow></mfrac><mo>≤</mo><mi>q</mi><mo stretchy="true" form="postfix">}</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mo>+</mo></msub><mo>=</mo><munder><mi mathvariant="normal">argmin</mi><mrow><mi>t</mi><mo>&gt;</mo><mn>0</mn></mrow></munder><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mo stretchy="false" form="prefix">|</mo><mo stretchy="false" form="prefix">{</mo><mi>j</mi><mo>:</mo><msub><mi>W</mi><mi>j</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="false" form="prefix">|</mo></mrow><mrow><mo stretchy="false" form="prefix">|</mo><mo stretchy="false" form="prefix">{</mo><mi>j</mi><mo>:</mo><msub><mi>W</mi><mi>j</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="false" form="prefix">|</mo></mrow></mfrac><mo>≤</mo><mi>q</mi><mo stretchy="true" form="postfix">}</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \tau_+ = \underset{t&gt;0}{\operatorname{argmin}} \left\{\frac{1 + |\{j : W_j \leq t\}|}{|\{j : W_j \leq t\}|} \leq q\right\}.
 </annotation></semantics></math> This workflow selects variables
 associated with response with guaranteed control of false discovery rate
@@ -146,7 +146,7 @@ independently from a multivariate Gaussian distribution with mean
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">p \times p</annotation></semantics></math>
 covariance matrix
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Σ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mn>1</mn><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>=</mo><mi>j</mi><mo stretchy="false" form="postfix">}</mo><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">Independent,</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><msup><mi>ρ</mi><mrow><mn>1</mn><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>≠</mo><mi>j</mi><mo stretchy="false" form="postfix">}</mo></mrow></msup><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">Equicorrelated,</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><msup><mi>ρ</mi><mrow><mo stretchy="true" form="prefix">|</mo><mi>i</mi><mo>−</mo><mi>j</mi><mo stretchy="true" form="postfix">|</mo></mrow></msup><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">AR1</mtext><mo>,</mo></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Σ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mn>1</mn><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>=</mo><mi>j</mi><mo stretchy="false" form="postfix">}</mo><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">Independent,</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><msup><mi>ρ</mi><mrow><mn>1</mn><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>≠</mo><mi>j</mi><mo stretchy="false" form="postfix">}</mo></mrow></msup><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">Equicorrelated,</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><msup><mi>ρ</mi><mrow><mo stretchy="false" form="prefix">|</mo><mi>i</mi><mo>−</mo><mi>j</mi><mo stretchy="false" form="prefix">|</mo></mrow></msup><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mtext mathvariant="normal">AR1</mtext><mo>,</mo></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
 \Sigma_{ij} = \left \{
 \begin{array}{lr}
 1\{i = j\}, &amp; \text{Independent,} \\
@@ -158,7 +158,7 @@ covariance matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>b</mi></msub><annotation encoding="application/x-tex">p_b</annotation></semantics></math>
 randomly selected columns are then dichotomized with the indicator
 function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>1</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\delta(x)=1(x &gt; 0)</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>&gt;</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\delta(x)=1(x &gt; 0)</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate a 2000 x 30 Gaussian data.frame under equi-correlation(rho=0.5) structure, </span></span>
 <span><span class="co"># with 10 of the columns  dichotomized</span></span>
@@ -173,10 +173,10 @@ class <code>"numeric"</code> (for the continuous columns) or
 <code>simulWeib</code> simulates survival times
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
 from a Cox regression model</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
 \lambda(t) = \lambda_0(t) \exp \left(X \beta \right),
 </annotation></semantics></math> with Weibull baseline hazard:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mi>ρ</mi><msup><mi>t</mi><mrow><mi>ρ</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mi>ρ</mi><msup><mi>t</mi><mrow><mi>ρ</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">
 \lambda_0(t) = \lambda_0 \rho t^{\rho-1}
 </annotation></semantics></math> where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\lambda_0 &gt; 0</annotation></semantics></math>
@@ -205,9 +205,9 @@ have been simulated the function sets <code>time = min(T, C)</code> and
 <span><span class="op">}</span></span></code></pre></div>
 <p>In this toy data set we assume that the first five covariates affect
 the hazard
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\lambda(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda(t)</annotation></semantics></math>
 through the linear predictor
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>ℓ</mo><mi>p</mi></msub><mo>=</mo><mi>X</mi><mi>β</mi></mrow><annotation encoding="application/x-tex">\ell_p=X\beta</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℓ</mi><mi>p</mi></msub><mo>=</mo><mi>X</mi><mi>β</mi></mrow><annotation encoding="application/x-tex">\ell_p=X\beta</annotation></semantics></math>
 and then simulate the survival object:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_lp.html">generate_lp</a></span><span class="op">(</span><span class="va">X</span>, p_nn<span class="op">=</span><span class="fl">5</span>, a<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
@@ -224,32 +224,32 @@ knockoffs
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>X</mi><mo accent="true">̃</mo></mover><mi>k</mi></msub><annotation encoding="application/x-tex">\tilde{X}_k</annotation></semantics></math>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,M</annotation></semantics></math>,
 (b) fit the aggregated Cox model to above data:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>λ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><msup><mi>β</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo>+</mo><msub><mover><mi>X</mi><mo accent="true">̃</mo></mover><mi>k</mi></msub><msup><mover><mi>β</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><msup><mi>β</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>+</mo><msub><mover><mi>X</mi><mo accent="true">̃</mo></mover><mi>k</mi></msub><msup><mover><mi>β</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
 \lambda(t) = \lambda_0(t) \exp \left(X \beta^{(k)} + \tilde{X}_k \tilde{\beta}^{(k)} \right),
 \end{align}</annotation></semantics></math> for each of the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,M</annotation></semantics></math>
 knockoff copies. Then finally calculate (for each knockoff
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>)
 the corresponding knockoff (feature) statistics
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>W</mi><mi>j</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo>=</mo><mrow><mo stretchy="true" form="prefix">|</mo><msubsup><mi>β</mi><mi>j</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="true" form="postfix">|</mo></mrow><mo>−</mo><mrow><mo stretchy="true" form="prefix">|</mo><msubsup><mover><mi>β</mi><mo accent="true">̃</mo></mover><mi>j</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">W^{(k)}_j = |\beta_j^{(k)}|-|\tilde{\beta}_j^{(k)}|</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>W</mi><mi>j</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo>=</mo><mo stretchy="false" form="prefix">|</mo><msubsup><mi>β</mi><mi>j</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">|</mo><mi>−</mi><mo stretchy="false" form="prefix">|</mo><msubsup><mover><mi>β</mi><mo accent="true">̃</mo></mover><mi>j</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">W^{(k)}_j = |\beta_j^{(k)}|-|\tilde{\beta}_j^{(k)}|</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">W</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/knockoff.statistics.html">knockoff.statistics</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">X</span>, type<span class="op">=</span><span class="st">"survival"</span>, M<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">W</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             W1          W2         W3        W4         W5          W6</span></span>
-<span><span class="co">#&gt; X1  1.68417085  1.64920854 1.71294466 1.7130229 1.72623754  1.76959115</span></span>
-<span><span class="co">#&gt; X2  1.78733106  1.79439991 1.82809127 1.7953936 1.80803144  1.83159085</span></span>
-<span><span class="co">#&gt; X3  1.74840772  1.75951906 1.80838883 1.7588122 1.75238267  1.80715192</span></span>
-<span><span class="co">#&gt; X4  1.72546124  1.67708322 1.78064956 1.7258980 1.74789299  1.73426786</span></span>
-<span><span class="co">#&gt; X5  1.75046697  1.74950657 1.82076525 1.7650704 1.78235237  1.83577773</span></span>
-<span><span class="co">#&gt; X6 -0.01921297 -0.01275992 0.01461379 0.0156508 0.01742504 -0.01154548</span></span>
-<span><span class="co">#&gt;            W7         W8         W9          W10</span></span>
-<span><span class="co">#&gt; X1 1.73428009 1.72061443 1.73521643  1.746217213</span></span>
-<span><span class="co">#&gt; X2 1.80838108 1.77398820 1.80714829  1.804438638</span></span>
-<span><span class="co">#&gt; X3 1.76401959 1.74515206 1.77405806  1.829114226</span></span>
-<span><span class="co">#&gt; X4 1.72333722 1.71313170 1.72602257  1.779804692</span></span>
-<span><span class="co">#&gt; X5 1.78468873 1.77687033 1.79819418  1.805816339</span></span>
-<span><span class="co">#&gt; X6 0.00387067 0.01255798 0.01473674 -0.003842216</span></span></code></pre></div>
+<span><span class="co">#&gt;             W1         W2           W3          W4          W5            W6</span></span>
+<span><span class="co">#&gt; X1 1.742230647 1.68695350  1.744375053  1.73921445  1.73661547  1.7224342887</span></span>
+<span><span class="co">#&gt; X2 1.822320229 1.76226767  1.796575316  1.82379013  1.82387013  1.8297474073</span></span>
+<span><span class="co">#&gt; X3 1.787348264 1.73224649  1.784643731  1.78170979  1.79086078  1.8035463616</span></span>
+<span><span class="co">#&gt; X4 1.760422433 1.69282300  1.735334107  1.73255843  1.76043814  1.7685059209</span></span>
+<span><span class="co">#&gt; X5 1.801212198 1.72878954  1.781207843  1.78553658  1.79759544  1.7725064563</span></span>
+<span><span class="co">#&gt; X6 0.006585451 0.01170532 -0.009419399 -0.02269647 -0.04179274 -0.0007496706</span></span>
+<span><span class="co">#&gt;            W7         W8          W9        W10</span></span>
+<span><span class="co">#&gt; X1 1.72380827 1.70716152 1.731362435 1.72685038</span></span>
+<span><span class="co">#&gt; X2 1.77386245 1.77040710 1.830630550 1.80223349</span></span>
+<span><span class="co">#&gt; X3 1.74053377 1.75111840 1.759060616 1.76176725</span></span>
+<span><span class="co">#&gt; X4 1.70695859 1.72653867 1.771150088 1.73850985</span></span>
+<span><span class="co">#&gt; X5 1.77945897 1.75870880 1.817768051 1.78110133</span></span>
+<span><span class="co">#&gt; X6 0.01535043 0.01183971 0.008989224 0.01786314</span></span></code></pre></div>
 <p>The output is a data.frame whose columns are the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
 knockoff statistics. In the above we have used (as a default) parallel
@@ -279,9 +279,9 @@ target error level.</p>
 <span><span class="co">#&gt; X3  1  1  1  1  1  1  1  1  1   1</span></span>
 <span><span class="co">#&gt; X4  1  1  1  1  1  1  1  1  1   1</span></span>
 <span><span class="co">#&gt; X5  1  1  1  1  1  1  1  1  1   1</span></span>
-<span><span class="co">#&gt; X6  0  0  0  1  0  0  0  0  0   0</span></span>
+<span><span class="co">#&gt; X6  0  1  0  0  0  0  0  0  0   0</span></span>
 <span><span class="va">S</span><span class="op">$</span><span class="va">stable.variables</span></span>
-<span><span class="co">#&gt; [1] "X1" "X2" "X3" "X4" "X5"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X23" "X27"</span></span></code></pre></div>
 <p>In a nutshell the function will both calculate individual variable
 selections (for each knockoff replicate) and a stable set of variables
 that are selected most frequently among the <code>M</code> replicates.
@@ -335,9 +335,9 @@ We propose the following heuristics to select a final set of
 variables:</p>
 <ul>
 <li>Let
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⊆</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>p</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">F(r) \subseteq \{1,\dots,p\}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>⊆</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>p</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">F(r) \subseteq \{1,\dots,p\}</annotation></semantics></math>,
 where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">r \in [0.5, 1]</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">r \in [0.5, 1]</annotation></semantics></math>,
 denote the set of variables selected more than
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>⋅</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">r \cdot B</annotation></semantics></math>
 times out of the
@@ -346,17 +346,17 @@ knockoff draws.</li>
 <li>Let <span class="math inline">$S(r)=\underset{b}{\rm mode}\{F(r)
 \cap S_b\}$</span> denote the set of selected variables that appears
 most frequently, after filtering out variables that are not in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">F(r)</annotation></semantics></math>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">F(r)</annotation></semantics></math>.</li>
 <li>Return
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>S</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>r</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{S} = S(\hat{r})</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>S</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>r</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat{S} = S(\hat{r})</annotation></semantics></math>,
 where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>r</mi><mo accent="true">̂</mo></mover><mo>=</mo><munder><mo>argmax</mo><mrow><mi>r</mi><mo>≥</mo><mn>0.5</mn></mrow></munder><mrow><mo stretchy="true" form="prefix">|</mo><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{r} = \underset{r \geq 0.5}{\operatorname{argmax}} |{S(r)}|</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>r</mi><mo accent="true">̂</mo></mover><mo>=</mo><munder><mi mathvariant="normal">argmax</mi><mrow><mi>r</mi><mo>≥</mo><mn>0.5</mn></mrow></munder><mo stretchy="false" form="prefix">|</mo><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">\hat{r} = \underset{r \geq 0.5}{\operatorname{argmax}} |{S(r)}|</annotation></semantics></math>,
 i.e. the largest set among
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:</mo><mi>r</mi><mo>≥</mo><mn>0.5</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S(r):r \geq 0.5\}</annotation></semantics></math>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>:</mo><mi>r</mi><mo>≥</mo><mn>0.5</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S(r):r \geq 0.5\}</annotation></semantics></math>.</li>
 </ul>
 <p>The first step above essentially filters out variables that don’t
 appear more than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>100</mn><mo>⋅</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>%</mi></mrow><annotation encoding="application/x-tex">(100\cdot r)\%</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>100</mn><mo>⋅</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mi>%</mi></mrow><annotation encoding="application/x-tex">(100\cdot r)\%</annotation></semantics></math>
 of the time, which would seem like a reasonable requirement in practice
 (e.g. with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">r=0.5</annotation></semantics></math>).
@@ -367,13 +367,13 @@ knockoff selections
 accordingly and searches for the most frequent variable set among those.
 The third step then establishes the final selection, namely the most
 liberal variable selection among the sets
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:</mo><mi>r</mi><mo>≥</mo><mn>0.5</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S(r):r \geq 0.5\}</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>:</mo><mi>r</mi><mo>≥</mo><mn>0.5</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S(r):r \geq 0.5\}</annotation></semantics></math>.</p>
 </div>
 </div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-seqknockoffpaper" class="csl-entry">
 Kormaksson, M., L. J. Kelly, X. Zhu, S. Haemmerle, L. Pricop, and D.
 Ohlssen. 2021. <span>“Sequential Knockoffs for Continuous and

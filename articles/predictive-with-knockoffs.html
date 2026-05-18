@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Deriving predictive variables using knockoffs • knockofftools</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Deriving predictive variables using knockoffs">
 </head>
@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Kostas
 Sechidis, Matthias Kormaksson</h4>
             
-            <h4 data-toc-skip class="date">April 13, 2026</h4>
+            <h4 data-toc-skip class="date">May 18, 2026</h4>
       
 
       <div class="d-none name"><code>predictive-with-knockoffs.Rmd</code></div>
@@ -77,8 +77,7 @@ identify variables that modify the treatment effect. In particular
 firstly we will introduce what predictive variables are, and then we
 will present various knockoff based filter tailored to the task
 identifying predictive variables. More details on this topic can be
-found in <span class="citation">(<a href="#ref-predknockoffpaper">Sechidis, Kormaksson, and Ohlssen
-2021</a>)</span></p>
+found in <span class="citation">(<a href="#ref-predknockoffpaper">Sechidis et al. 2021</a>)</span></p>
 <p>When we perform an intervention there are typically two types of
 variables we are interested in. First, prognostic variables, which,
 independent of the treatment, have a direct impact on the target
@@ -87,15 +86,15 @@ Second, predictive variables, which have an impact on the outcome by
 interacting with the treatment and explain the heterogeneous treatment
 effect. To illustrate the distinction between these two types of
 variables, a common approach is to assume a known data generating model
-<span class="citation">(<a href="#ref-lipkovich2017tutorial">Lipkovich,
-Dmitrienko, and B D’Agostino Sr 2017</a>)</span>:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo>=</mo><mi>𝐱</mi><mo>,</mo><mi>T</mi><mo>=</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>t</mi><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+<span class="citation">(<a href="#ref-lipkovich2017tutorial">Lipkovich
+et al. 2017</a>)</span>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>𝔼</mi><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo>=</mo><mi>𝐱</mi><mo>,</mo><mi>T</mi><mo>=</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mi>t</mi><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
 \mathbb{E}(Y| {X} = \mathbf{x} ,T = t) = h(\mathbf{x}) + g(\mathbf{x})t. 
 \end{align}</annotation></semantics></math> Prognostic variables are
 those that contribute to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(\mathbf{x})</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h(\mathbf{x})</annotation></semantics></math>
 (i.e., ‘main effects’), while predictive are the ones that contribute to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g(\mathbf{x})</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">g(\mathbf{x})</annotation></semantics></math>.
 The focus of this vignette will be on the predictive variables. Here we
 will show how to use use two different knockoff filters to discover
 predictive variables, while controlling type-I error.</p>
@@ -112,7 +111,7 @@ predictive. Firstly, we will load the package</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_X.html">generate_X</a></span><span class="op">(</span>n<span class="op">=</span><span class="fl">500</span>, p<span class="op">=</span><span class="fl">10</span>, p_b<span class="op">=</span><span class="fl">0</span>, cov_type<span class="op">=</span><span class="st">"cov_diag"</span>, rho<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span></code></pre></div>
 <p>Then we will calculate the linear predictor for the prognostic part
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(\mathbf{x})</annotation></semantics></math>),
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h(\mathbf{x})</annotation></semantics></math>),
 where the first <code>p_nn</code> regression coefficients are non-zero,
 all other are set to zero. The (common) amplitude of the non-zero
 regression coefficients is specified with <code>a</code>. In other words
@@ -165,7 +164,7 @@ predicting the outcome
 while CT focus on estimating the treatment effect. % for each example
 (patient). In CT, heterogeneous effects are described by the conditional
 average treatment effect (CATE):
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>Y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo>=</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbb{E} \left[ Y(1) - Y(0)| {X} = \mathbf{x}\right]</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>Y</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo>=</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbb{E} \left[ Y(1) - Y(0)| {X} = \mathbf{x}\right]</annotation></semantics></math>.</p>
 <p>We have implemented a knockoff filter that uses the importance scores
 from the causal forest to derive predictive markers.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -178,7 +177,7 @@ from the causal forest to derive predictive markers.</p>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-athey2016recursive" class="csl-entry">
 Athey, Susan, and Guido Imbens. 2016. <span>“Recursive Partitioning for
 Heterogeneous Causal Effects.”</span> <em>Proceedings of the National

@@ -39,5 +39,5 @@ Electronic Journal of Statistics, 10(1), 960-975.
 ``` r
 W <- rnorm(100)
 selections_control_kFWER(W, level=0.1, k=5)
-#>  [1]  2 10 59 30  8 77 58 86 74 54 72 39 49
+#> [1] 10 60
 ```

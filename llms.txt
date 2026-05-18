@@ -17,7 +17,7 @@ knockofftools.
 
 ## References
 
-Knockoff tools is introduced in [Zimmermann et
+The `knockofftools` package is introduced in [Zimmermann et
 al. 2024)](https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.3211).
 
 Furthermore, details of the novel implemented methods can be found in
