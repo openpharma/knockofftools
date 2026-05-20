@@ -49,8 +49,6 @@ plot.variable.selections <- function(S, nbcocluster=c(7,7)) {
                            variable = factor(rownames(S)),
                            selected = as.numeric(as.matrix(S)))
 
-  `%>%` <- dplyr::`%>%`
-
   sel.mat <- matrix(selections$selected,nrow=nrow(S))
   hclust.row <- hclust(dist(sel.mat, method="binary"), method="ward.D")
   hclust.col <- hclust(dist(t(sel.mat), method="binary"), method="ward.D")

@@ -28,8 +28,9 @@ Imports:
     grf (>= 2.3.1),
     glasso (>= 1.11),
     CVglasso (>= 1.0),
-    nnet (>= 7.3-18)
-RoxygenNote: 7.2.3
+    nnet (>= 7.3-18),
+    magrittr (>= 1.5)
+RoxygenNote: 7.3.3
 Suggests: 
     knitr,
     rmarkdown,
