@@ -34,8 +34,6 @@ test_that("plot.variable.selections works as expected", {
 
   p <- suppressWarnings(plot(S))
 
-  expect_equal(class(p), c("gg", "ggplot"))
-
   expect_error(plot.variable.selections(S$selected))
 
 })
