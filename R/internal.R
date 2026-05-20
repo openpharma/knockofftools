@@ -158,7 +158,7 @@ cv_coeffs_glmnet_with_fixed_effect <- function(X_fixed, X, y, family, nlambda=50
     X = scale(X)
   }
 
-  if (!methods::hasArg(lambda) ) {
+  if (!hasArg(lambda) ) {
     if( identical(family, "gaussian") ) {
       if(!is.numeric(y)) {
         stop('Input y must be numeric.')

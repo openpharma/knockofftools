@@ -26,7 +26,6 @@ Imports:
     survival (>= 2.44.1.1),
     randomForestSRC (>= 2.9.1),
     grf (>= 2.3.1),
-    glasso (>= 1.11),
     CVglasso (>= 1.0),
     nnet (>= 7.3-18),
     magrittr (>= 1.5)
