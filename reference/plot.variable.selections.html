@@ -45,20 +45,27 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'variable.selections'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">S</span>, nbcocluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, nbcocluster <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-s">S<a class="anchor" aria-label="anchor" href="#arg-s"></a></dt>
-<dd><p>data.frame of variable selections from multiple knockoffs (each entry is either 1 if variable is selected and 0 otherwise). Columns correspond to different knockoffs and rows correspond to the underlying variables. row.names(S) records the variable names.</p></dd>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>data.frame of variable selections from multiple knockoffs
+(each entry is either 1 if variable is selected and 0 otherwise).
+Columns correspond to different knockoffs and rows correspond to the
+underlying variables. row.names(x) records the variable names.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to other plot methods (currently ignored).</p></dd>
 
 
 <dt id="arg-nbcocluster">nbcocluster<a class="anchor" aria-label="anchor" href="#arg-nbcocluster"></a></dt>
 <dd><p>bivariate vector c(number of variable clusters, number of selection clusters).
-The former number must be specified less than nrow(S) and the latter must be less than ncol(S).</p></dd>
+The former number must be specified less than nrow(x) and the latter must be less than ncol(x).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -73,7 +80,6 @@ The former number must be specified less than nrow(S) and the latter must be les
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://opensource.nibr.com/knockofftools/" class="external-link">knockofftools</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate 8 Gaussian covariate predictors and 2 binary factors:</span></span></span>
@@ -82,16 +88,14 @@ The former number must be specified less than nrow(S) and the latter must be les
 <span class="r-in"><span><span class="co"># create linear predictor with first 5 beta-coefficients = 1 (all other zero)</span></span></span>
 <span class="r-in"><span><span class="va">lp</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_lp.html">generate_lp</a></span><span class="op">(</span><span class="va">X</span>, p_nn <span class="op">=</span> <span class="fl">5</span>, a<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Gaussian</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):</span></span></span>
+<span class="r-in"><span><span class="co"># Simulate response:</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">lp</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Calculate M independent knockoff feature statistics:</span></span></span>
+<span class="r-in"><span><span class="co"># Calculate knockoff statistics:</span></span></span>
 <span class="r-in"><span><span class="va">W</span> <span class="op">&lt;-</span> <span class="fu"><a href="knockoff.statistics.html">knockoff.statistics</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">y</span>, X<span class="op">=</span><span class="va">X</span>, type<span class="op">=</span><span class="st">"regression"</span>, M<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Running sequentially ('LOCAL') ...</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">S</span> <span class="op">=</span> <span class="fu"><a href="variable.selections.html">variable.selections</a></span><span class="op">(</span><span class="va">W</span>, error.type <span class="op">=</span> <span class="st">"pfer"</span>, level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">S</span> <span class="op">&lt;-</span> <span class="fu"><a href="variable.selections.html">variable.selections</a></span><span class="op">(</span><span class="va">W</span>, error.type <span class="op">=</span> <span class="st">"pfer"</span>, level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plot heatmap of knockoff selections:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">S</span><span class="op">)</span></span></span>

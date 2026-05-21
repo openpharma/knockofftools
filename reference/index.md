@@ -48,6 +48,8 @@
   variables) or multinomial logistic regression (factor variables)
   respectively. If X is empty, knockoffs are sampled from the marginal
   distribution of y
+- [`simdata`](https://openpharma.github.io/knockofftools/reference/simdata.md)
+  : Simulated dataset for knockofftools
 - [`simulWeib()`](https://openpharma.github.io/knockofftools/reference/simulWeib.md)
   : Function that simulates response from Cox model with Weibull
   baseline hazard:

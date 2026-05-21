@@ -32,13 +32,6 @@ knockoffs_sparse_seq(X, adjacency.matrix = NULL)
   corresponding to the non-zero elements of the precision matrix of X).
   Defaults to NULL and is then estimated within the function call.
 
-- seq_simulator:
-
-  name of function that used to estimate the conditional distributions
-  in the sequential steps. Default is the function `sim_simple`, which
-  is a least squares fit (continuous variables) or multinomial logistic
-  regression (factor variables) respectively.
-
 ## Value
 
 sparse sequential knockoff copy of X. A data.frame or tibble of same

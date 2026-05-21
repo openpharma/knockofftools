@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Matthias
 Kormaksson, Kostas Sechidis</h4>
             
-            <h4 data-toc-skip class="date">May 18, 2026</h4>
+            <h4 data-toc-skip class="date">May 21, 2026</h4>
       
 
       <div class="d-none name"><code>survival-analysis-with-knockoffs.Rmd</code></div>
@@ -236,20 +236,20 @@ the corresponding knockoff (feature) statistics
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">W</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/knockoff.statistics.html">knockoff.statistics</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">X</span>, type<span class="op">=</span><span class="st">"survival"</span>, M<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">W</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             W1         W2           W3          W4          W5            W6</span></span>
-<span><span class="co">#&gt; X1 1.742230647 1.68695350  1.744375053  1.73921445  1.73661547  1.7224342887</span></span>
-<span><span class="co">#&gt; X2 1.822320229 1.76226767  1.796575316  1.82379013  1.82387013  1.8297474073</span></span>
-<span><span class="co">#&gt; X3 1.787348264 1.73224649  1.784643731  1.78170979  1.79086078  1.8035463616</span></span>
-<span><span class="co">#&gt; X4 1.760422433 1.69282300  1.735334107  1.73255843  1.76043814  1.7685059209</span></span>
-<span><span class="co">#&gt; X5 1.801212198 1.72878954  1.781207843  1.78553658  1.79759544  1.7725064563</span></span>
-<span><span class="co">#&gt; X6 0.006585451 0.01170532 -0.009419399 -0.02269647 -0.04179274 -0.0007496706</span></span>
-<span><span class="co">#&gt;            W7         W8          W9        W10</span></span>
-<span><span class="co">#&gt; X1 1.72380827 1.70716152 1.731362435 1.72685038</span></span>
-<span><span class="co">#&gt; X2 1.77386245 1.77040710 1.830630550 1.80223349</span></span>
-<span><span class="co">#&gt; X3 1.74053377 1.75111840 1.759060616 1.76176725</span></span>
-<span><span class="co">#&gt; X4 1.70695859 1.72653867 1.771150088 1.73850985</span></span>
-<span><span class="co">#&gt; X5 1.77945897 1.75870880 1.817768051 1.78110133</span></span>
-<span><span class="co">#&gt; X6 0.01535043 0.01183971 0.008989224 0.01786314</span></span></code></pre></div>
+<span><span class="co">#&gt;            W1           W2          W3          W4         W5           W6</span></span>
+<span><span class="co">#&gt; X1 1.74385575  1.688399422  1.72585475  1.74029139  1.7234531  1.725687035</span></span>
+<span><span class="co">#&gt; X2 1.82294465  1.762800761  1.77717388  1.82853736  1.8040355  1.848307333</span></span>
+<span><span class="co">#&gt; X3 1.79006418  1.731865250  1.76590859  1.78565227  1.7681818  1.816228377</span></span>
+<span><span class="co">#&gt; X4 1.76204064  1.691894366  1.72672748  1.73142901  1.7408079  1.777589645</span></span>
+<span><span class="co">#&gt; X5 1.80203975  1.734332717  1.77405548  1.78675847  1.7793463  1.786158683</span></span>
+<span><span class="co">#&gt; X6 0.01294729 -0.004468954 -0.01579702 -0.03514107 -0.0258282 -0.001140941</span></span>
+<span><span class="co">#&gt;            W7         W8         W9        W10</span></span>
+<span><span class="co">#&gt; X1 1.75022900 1.70711399 1.72540564 1.70512312</span></span>
+<span><span class="co">#&gt; X2 1.80582574 1.77146158 1.81769534 1.78099929</span></span>
+<span><span class="co">#&gt; X3 1.76818033 1.75156179 1.74726089 1.74963685</span></span>
+<span><span class="co">#&gt; X4 1.73046674 1.72357287 1.75925751 1.72126777</span></span>
+<span><span class="co">#&gt; X5 1.81131739 1.75966621 1.80142519 1.76013210</span></span>
+<span><span class="co">#&gt; X6 0.01891569 0.01083217 0.01792927 0.01324787</span></span></code></pre></div>
 <p>The output is a data.frame whose columns are the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
 knockoff statistics. In the above we have used (as a default) parallel
@@ -279,9 +279,9 @@ target error level.</p>
 <span><span class="co">#&gt; X3  1  1  1  1  1  1  1  1  1   1</span></span>
 <span><span class="co">#&gt; X4  1  1  1  1  1  1  1  1  1   1</span></span>
 <span><span class="co">#&gt; X5  1  1  1  1  1  1  1  1  1   1</span></span>
-<span><span class="co">#&gt; X6  0  1  0  0  0  0  0  0  0   0</span></span>
+<span><span class="co">#&gt; X6  0  0  0  0  0  0  0  0  0   0</span></span>
 <span><span class="va">S</span><span class="op">$</span><span class="va">stable.variables</span></span>
-<span><span class="co">#&gt; [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X23" "X27"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X23"</span></span></code></pre></div>
 <p>In a nutshell the function will both calculate individual variable
 selections (for each knockoff replicate) and a stable set of variables
 that are selected most frequently among the <code>M</code> replicates.

@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Matthias
 Kormaksson, Kostas Sechidis</h4>
             
-            <h4 data-toc-skip class="date">May 18, 2026</h4>
+            <h4 data-toc-skip class="date">May 21, 2026</h4>
       
 
       <div class="d-none name"><code>knockofftools.Rmd</code></div>
@@ -261,14 +261,14 @@ nominal error level.</p>
 <code class="sourceCode R"><span><span class="va">S</span> <span class="op">=</span> <span class="fu"><a href="../reference/variable.selections.html">variable.selections</a></span><span class="op">(</span><span class="va">W</span>, level <span class="op">=</span> <span class="fl">0.1</span>, error.type<span class="op">=</span><span class="st">"fdr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">S</span><span class="op">$</span><span class="va">selected</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    S1 S2 S3 S4 S5 S6 S7 S8 S9 S10</span></span>
-<span><span class="co">#&gt; X1  1  1  0  0  1  1  1  1  1   0</span></span>
-<span><span class="co">#&gt; X2  1  1  0  0  1  1  1  1  1   0</span></span>
-<span><span class="co">#&gt; X3  1  1  0  0  1  1  1  1  1   0</span></span>
-<span><span class="co">#&gt; X4  1  1  0  0  1  1  1  1  1   0</span></span>
-<span><span class="co">#&gt; X5  1  1  0  0  1  1  1  1  1   0</span></span>
-<span><span class="co">#&gt; X6  1  1  0  0  1  1  1  1  1   0</span></span>
+<span><span class="co">#&gt; X1  1  1  0  0  1  0  1  1  1   0</span></span>
+<span><span class="co">#&gt; X2  1  1  0  0  1  0  1  1  1   0</span></span>
+<span><span class="co">#&gt; X3  1  1  0  0  1  0  1  1  1   0</span></span>
+<span><span class="co">#&gt; X4  1  1  0  0  1  0  1  1  1   0</span></span>
+<span><span class="co">#&gt; X5  1  1  0  0  1  0  1  1  1   0</span></span>
+<span><span class="co">#&gt; X6  1  1  0  0  1  0  1  1  1   0</span></span>
 <span><span class="va">S</span><span class="op">$</span><span class="va">stable.variables</span></span>
-<span><span class="co">#&gt;  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X9"  "X10" "X20"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X10" "X20"</span></span></code></pre></div>
 <p>In a nutshell the function will both calculate individual variable
 selections (for each knockoff replicate), but also a stable set of
 variables that are selected most frequently among the replicates. For

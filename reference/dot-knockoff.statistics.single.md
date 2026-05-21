@@ -67,11 +67,6 @@ Do not call this function on its own. Use `knockoff.statistics` instead.
   the knockoffs parameter X_k should not be entered by user; it is
   already calculated inside the knockoff.statistics function).
 
-- M:
-
-  the number of independent knockoff feature statistics that should be
-  calculated.
-
 ## Value
 
 data.frame with a single knockoff statistics W as column.

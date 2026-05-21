@@ -1,7 +1,7 @@
-# Heuristic check for whether a variable can be reasonably treated as continuous
+# Heuristic check for whether numeric variables can be reasonably treated as continuous
 
-Heuristic check for whether a variable can be reasonably treated as
-continuous
+Heuristic check for whether numeric variables can be reasonably treated
+as continuous
 
 ## Usage
 
@@ -11,9 +11,10 @@ check_if_continuous(X)
 
 ## Arguments
 
-- x:
+- X:
 
-  a numeric variable vector
+  the design matrix of interest with columns either "numeric" or
+  "factor"
 
 ## Value
 

@@ -6,7 +6,7 @@ forest
 ## Usage
 
 ``` r
-random_forest_importance_scores(X, y, trt, type = "regression", ...)
+random_forest_importance_scores(X, y, trt, type = "regression")
 ```
 
 ## Arguments
@@ -26,8 +26,6 @@ random_forest_importance_scores(X, y, trt, type = "regression", ...)
 
   should be "regression" if y is numeric, "classification" if y is a
   binary factor variable or "survival" if y is a survival object.
-
-- ...:
 
 ## Value
 

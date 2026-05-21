@@ -19,6 +19,12 @@ cv_coeffs_glmnet_with_fixed_effect(
 
 ## Arguments
 
+- X_fixed:
+
+  a data.frame (or tibble) with "numeric" and "factor" columns
+  corresponding to covariates or terms that should be treated as fixed
+  effects in the model.
+
 - X:
 
   original data.frame (or tibble) with "numeric" and "factor" columns
@@ -51,12 +57,6 @@ cv_coeffs_glmnet_with_fixed_effect(
 - ...:
 
   other parameters passed to glmnet::cv.glmnet
-
-- X.fixed:
-
-  a data.frame (or tibble) with "numeric" and "factor" columns
-  corresponding to covariates or terms that should be treated as fixed
-  effects in the model.
 
 ## Value
 

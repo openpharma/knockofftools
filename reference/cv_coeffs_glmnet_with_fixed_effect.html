@@ -59,7 +59,11 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-x-fixed">X_fixed<a class="anchor" aria-label="anchor" href="#arg-x-fixed"></a></dt>
+<dd><p>a data.frame (or tibble) with "numeric" and "factor" columns corresponding to covariates or terms that should be treated as fixed effects in the model.</p></dd>
+
+
+<dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>original data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be &gt; 2.</p></dd>
 
 
@@ -82,10 +86,6 @@ as obtained from y = survival::Surv(time, status).</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>other parameters passed to glmnet::cv.glmnet</p></dd>
-
-
-<dt id="arg-x-fixed">X.fixed<a class="anchor" aria-label="anchor" href="#arg-x-fixed"></a></dt>
-<dd><p>a data.frame (or tibble) with "numeric" and "factor" columns corresponding to covariates or terms that should be treated as fixed effects in the model.</p></dd>
 
 </dl></div>
     <div class="section level2">

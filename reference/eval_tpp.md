@@ -15,7 +15,7 @@ eval_tpp(selected, positives)
 
   vector of indices of selected variables
 
-- negatives:
+- positives:
 
   vector of indices of known non-null variables (that influence
   response)

@@ -36,6 +36,8 @@ stat_random_forest(X, X_k, y, type = "regression", ...)
 
 - ...:
 
+  other parameters passed to `random_forest_importance_scores`.
+
 ## Value
 
 data.frame with knockoff statistics W as column. The number of rows

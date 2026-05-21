@@ -174,14 +174,14 @@ level.
 S = variable.selections(W, level = 0.1, error.type="fdr")
 head(S$selected)
 #>    S1 S2 S3 S4 S5 S6 S7 S8 S9 S10
-#> X1  1  1  0  0  1  1  1  1  1   0
-#> X2  1  1  0  0  1  1  1  1  1   0
-#> X3  1  1  0  0  1  1  1  1  1   0
-#> X4  1  1  0  0  1  1  1  1  1   0
-#> X5  1  1  0  0  1  1  1  1  1   0
-#> X6  1  1  0  0  1  1  1  1  1   0
+#> X1  1  1  0  0  1  0  1  1  1   0
+#> X2  1  1  0  0  1  0  1  1  1   0
+#> X3  1  1  0  0  1  0  1  1  1   0
+#> X4  1  1  0  0  1  0  1  1  1   0
+#> X5  1  1  0  0  1  0  1  1  1   0
+#> X6  1  1  0  0  1  0  1  1  1   0
 S$stable.variables
-#>  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X9"  "X10" "X20"
+#>  [1] "X1"  "X2"  "X3"  "X4"  "X5"  "X6"  "X7"  "X8"  "X10" "X20"
 ```
 
 In a nutshell the function will both calculate individual variable
