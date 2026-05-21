@@ -133,7 +133,7 @@ find_single_optimal_variable_set <- function(S, p, trim=0.5) {
 #' Do not call this function on its own. Fits cross-validated glmnet model with fixed effect.
 #'
 #'
-#' @param X.fixed a data.frame (or tibble) with "numeric" and "factor" columns corresponding to covariates or terms that should be treated as fixed effects in the model.
+#' @param X_fixed a data.frame (or tibble) with "numeric" and "factor" columns corresponding to covariates or terms that should be treated as fixed effects in the model.
 #' @param X original data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric" (family="gaussian") or binary "factor" (family="binomial"). Can also be a survival object of class Surv
 #' as obtained from y = survival::Surv(time, status).
@@ -158,7 +158,7 @@ cv_coeffs_glmnet_with_fixed_effect <- function(X_fixed, X, y, family, nlambda=50
     X = scale(X)
   }
 
-  if (!methods::hasArg(lambda) ) {
+  if (!hasArg(lambda) ) {
     if( identical(family, "gaussian") ) {
       if(!is.numeric(y)) {
         stop('Input y must be numeric.')
@@ -195,13 +195,12 @@ cv_coeffs_glmnet_with_fixed_effect <- function(X_fixed, X, y, family, nlambda=50
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric" (family="gaussian") or binary "factor" (family="binomial"). Can also be a survival object of class Surv
 #' as obtained from y = survival::Surv(time, status).
 #' @param type should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.
-#' @param ...
 #'
 #' @return importance scores
 #' @export
 #'
 #' @keywords internal
-random_forest_importance_scores <- function(X, y, trt, type = "regression", ...){
+random_forest_importance_scores <- function(X, y, trt, type = "regression"){
   # make the column names unique
   colnames(X) = make.unique(colnames(X))
 
@@ -323,16 +322,15 @@ ns.transform <- function(y) {
 
 }
 
-#' Heuristic check for whether a variable can be reasonably treated as continuous
+#' Heuristic check for whether numeric variables can be reasonably treated as continuous
 #'
-#' @param x a numeric variable vector
+#' @param X the design matrix of interest with columns either "numeric" or "factor"
 #'
 #' @return a logical TRUE or FALSE depending on whether n_distinct(x) > 30
 #' @export
 #'
 #' @keywords internal
 check_if_continuous <- function(X) {
-  `%>%` <- magrittr::`%>%`
   X_numeric <- dplyr::select_if(X, is.numeric)
   is.continuous <- sum(X_numeric %>% lapply(dplyr::n_distinct) %>% unlist() <= 30) > 0
   if (is.continuous) warning("Some of the numeric columns of X have suspiciously few distinct values: n_distinct <= 30. Those columns should perhaps not be treated as continuous variables. Please review carefully and read the documentation about the gcm parameter of the knockoff.statistics function.")

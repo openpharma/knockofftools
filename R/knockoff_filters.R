@@ -157,7 +157,6 @@ knockoff.statistics <- function(y, X, type="regression",
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric", binary "factor", or survival ("Surv") object.
 #' @param X data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.
 #' @param type should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.
-#' @param M the number of independent knockoff feature statistics that should be calculated.
 #' @param knockoff.method what type of knockoffs to calculate. Defaults to sequential knockoffs, knockoff.method="seq", but other options are "sparseseq" and "mx". The "mx" option only works if all columns of X are continuous.
 #' @param statistic knockoff feature statistic function, defaults to glmnet coefficient difference (statistic="stat_glmnet"; see ?stat_glmnet). Other options include statistic="stat_random_forest" (see ?stat_random_forest), statistic="stat_predictive_glmnet" (see ?stat_predictive_glmnet) or statistic="stat_predictive_causal_forest" (see ?stat_predictive_causal_forest).
 #' @param trt binary treatment (factor) variable required if statistic involves a predictive knockoff filter (i.e. if statistic="stat_predictive_glmnet" or statistic="stat_predictive_causal_forest")
@@ -315,7 +314,7 @@ stat_glmnet <- function(y, X, X_k, type = "regression", X.fixed=NULL, penalty.fi
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric" (family="gaussian") or binary "factor" (family="binomial"). Can also be a survival object of class "Surv" (type="survival")
 #' as obtained from y = survival::Surv(time, status).
 #' @param type should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.
-#' @param ...
+#' @param ... other parameters passed to \code{random_forest_importance_scores}.
 #'
 #' @return data.frame with knockoff statistics W as column. The number of rows matches the number of columns (variables) of the data.frame X and the variable names are recorded in rownames(W).
 #' @export

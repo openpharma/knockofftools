@@ -37,7 +37,7 @@ knockoffs_seq <- function(X, seq_simulator = sim_glmnet, ...) {
     y <- X[[i]] # i-th column serves as response
     Xp <- X[,-i] # columns[-i] serve as predictors
 
-    if (loop.count > 1) Xp <- cbind(knockoffs[,shf[1:(loop.count-1)]], Xp)
+    if (loop.count > 1) Xp <- cbind(knockoffs[,shf[1:(loop.count-1)], drop=FALSE], Xp)
 
     knockoffs[[i]] <- seq_simulator(y = y, X = Xp, ...)
 
@@ -90,7 +90,7 @@ sim_glmnet <- function(y, X, ...) {
     # Beta coefficients (excluding intercept)
     beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.1se")[[2]])[-1]
 
-    mu <- predict(gm.cv, newx=x, type="response", s="lambda.1se")
+    mu <- predict(gm.cv, newx=x, type="response", s="lambda.min")
 
     mat.multinom <- apply(mu, 1, function(prob) rmultinom(n=1, size=1, prob=prob))
 
@@ -107,7 +107,7 @@ sim_glmnet <- function(y, X, ...) {
     gm.cv <- glmnet::cv.glmnet(y=y, x=x, family="gaussian", intercept=TRUE, alpha=1, ...)
 
     # Beta coefficients (excluding intercept)
-    beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.1se"))[-1]
+    beta.coefs <- as.numeric(coef(gm.cv, s = "lambda.min"))[-1]
 
     # columns of predictor matrix corresponding to non-zero beta.coefs:
     non.zero.cols <- which(beta.coefs != 0)
@@ -115,7 +115,7 @@ sim_glmnet <- function(y, X, ...) {
     # Total number of non-zero parameters (including intercept, hence + 1)
     s.lambda = length(non.zero.cols) + 1
 
-    mu <- predict(gm.cv, newx=x, type="response", s="lambda.1se")
+    mu <- predict(gm.cv, newx=x, type="response", s="lambda.min")
 
     rmse = sqrt(sum((y-mu)^2)/(length(y) - s.lambda))
 
@@ -144,7 +144,6 @@ sim_glmnet <- function(y, X, ...) {
 #'
 #' @param X data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.
 #' @param adjacency.matrix optional user specified adjacency matrix (i.e. binary indicator matrix corresponding to the non-zero elements of the precision matrix of X). Defaults to NULL and is then estimated within the function call.
-#' @param seq_simulator name of function that used to estimate the conditional distributions in the sequential steps. Default is the function \code{sim_simple}, which is a least squares fit (continuous variables) or multinomial logistic regression (factor variables) respectively.
 #'
 #' @return sparse sequential knockoff copy of X. A data.frame or tibble of same type and dimensions as X.
 #' @export

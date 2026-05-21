@@ -21,7 +21,7 @@ eval_fdp <- function(selected, negatives) {
 #' True positive proportion (tpp) as function of selection and known positives:
 #'
 #' @param selected vector of indices of selected variables
-#' @param negatives vector of indices of known non-null variables (that influence response)
+#' @param positives vector of indices of known non-null variables (that influence response)
 #'
 #' @return true positive rate
 #' @export

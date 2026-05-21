@@ -31,8 +31,6 @@
 \item{adjacency.matrix}{optional user specified adjacency matrix (i.e. binary indicator matrix corresponding to the non-zero elements of the precision matrix of X). Defaults to NULL and is then estimated within the function call.}
 
 \item{...}{additional parameters passed to the "statistic" function (note that the knockoffs parameter X_k should not be entered by user; it is already calculated inside the knockoff.statistics function).}
-
-\item{M}{the number of independent knockoff feature statistics that should be calculated.}
 }
 \value{
 data.frame with a single knockoff statistics W as column.

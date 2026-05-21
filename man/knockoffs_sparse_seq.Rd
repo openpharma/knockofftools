@@ -10,8 +10,6 @@ knockoffs_sparse_seq(X, adjacency.matrix = NULL)
 \item{X}{data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.}
 
 \item{adjacency.matrix}{optional user specified adjacency matrix (i.e. binary indicator matrix corresponding to the non-zero elements of the precision matrix of X). Defaults to NULL and is then estimated within the function call.}
-
-\item{seq_simulator}{name of function that used to estimate the conditional distributions in the sequential steps. Default is the function \code{sim_simple}, which is a least squares fit (continuous variables) or multinomial logistic regression (factor variables) respectively.}
 }
 \value{
 sparse sequential knockoff copy of X. A data.frame or tibble of same type and dimensions as X.
