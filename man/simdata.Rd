@@ -5,12 +5,12 @@
 \alias{simdata}
 \title{Simulated dataset for knockofftools}
 \format{
-A data frame with 2000 rows and multiple columns:
+A data frame with 2000 rows and 33 variables:
 \describe{
-  \item{Yg}{Numeric, Gaussian response}
-  \item{Yb}{Factor, binary response}
-  \item{Tc}{Survival object (time-to-event outcome)}
-  \item{X...}{Covariates (numeric and factor)}
+  \item{Tc}{Treatment indicator}
+  \item{X1--X30}{Covariates}
+  \item{Yb}{Binary outcome}
+  \item{Yg}{Continuous outcome}
 }
 }
 \source{

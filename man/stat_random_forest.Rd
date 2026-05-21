@@ -17,7 +17,7 @@ as obtained from y = survival::Surv(time, status).}
 
 \item{type}{should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.}
 
-\item{...}{}
+\item{...}{other parameters passed to \code{random_forest_importance_scores}.}
 }
 \value{
 data.frame with knockoff statistics W as column. The number of rows matches the number of columns (variables) of the data.frame X and the variable names are recorded in rownames(W).

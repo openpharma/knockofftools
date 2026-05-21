@@ -4,7 +4,7 @@
 \alias{random_forest_importance_scores}
 \title{Internal function called to return the importance scores from random forest}
 \usage{
-random_forest_importance_scores(X, y, trt, type = "regression", ...)
+random_forest_importance_scores(X, y, trt, type = "regression")
 }
 \arguments{
 \item{X}{original data.frame with "numeric" and "factor" columns only.}
@@ -13,8 +13,6 @@ random_forest_importance_scores(X, y, trt, type = "regression", ...)
 as obtained from y = survival::Surv(time, status).}
 
 \item{type}{should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.}
-
-\item{...}{}
 }
 \value{
 importance scores

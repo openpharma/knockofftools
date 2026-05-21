@@ -9,7 +9,7 @@ eval_tpp(selected, positives)
 \arguments{
 \item{selected}{vector of indices of selected variables}
 
-\item{negatives}{vector of indices of known non-null variables (that influence response)}
+\item{positives}{vector of indices of known non-null variables (that influence response)}
 }
 \value{
 true positive rate

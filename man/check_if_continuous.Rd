@@ -2,17 +2,17 @@
 % Please edit documentation in R/internal.R
 \name{check_if_continuous}
 \alias{check_if_continuous}
-\title{Heuristic check for whether a variable can be reasonably treated as continuous}
+\title{Heuristic check for whether numeric variables can be reasonably treated as continuous}
 \usage{
 check_if_continuous(X)
 }
 \arguments{
-\item{x}{a numeric variable vector}
+\item{X}{the design matrix of interest with columns either "numeric" or "factor"}
 }
 \value{
 a logical TRUE or FALSE depending on whether n_distinct(x) > 30
 }
 \description{
-Heuristic check for whether a variable can be reasonably treated as continuous
+Heuristic check for whether numeric variables can be reasonably treated as continuous
 }
 \keyword{internal}
