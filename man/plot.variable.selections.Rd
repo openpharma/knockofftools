@@ -4,13 +4,18 @@
 \alias{plot.variable.selections}
 \title{Heatmap of multiple variable selections ordered by importance}
 \usage{
-\method{plot}{variable.selections}(S, nbcocluster = c(7, 7))
+\method{plot}{variable.selections}(x, ..., nbcocluster = c(7, 7))
 }
 \arguments{
-\item{S}{data.frame of variable selections from multiple knockoffs (each entry is either 1 if variable is selected and 0 otherwise). Columns correspond to different knockoffs and rows correspond to the underlying variables. row.names(S) records the variable names.}
+\item{x}{data.frame of variable selections from multiple knockoffs
+(each entry is either 1 if variable is selected and 0 otherwise).
+Columns correspond to different knockoffs and rows correspond to the
+underlying variables. row.names(x) records the variable names.}
+
+\item{...}{Additional arguments passed to other plot methods (currently ignored).}
 
 \item{nbcocluster}{bivariate vector c(number of variable clusters, number of selection clusters).
-The former number must be specified less than nrow(S) and the latter must be less than ncol(S).}
+The former number must be specified less than nrow(x) and the latter must be less than ncol(x).}
 }
 \value{
 plot of heatmap
@@ -23,7 +28,6 @@ To help visualize most important variables we perform clustering both selections
 }
 \examples{
 library(knockofftools)
-
 set.seed(1)
 
 # Simulate 8 Gaussian covariate predictors and 2 binary factors:
@@ -32,15 +36,13 @@ X <- generate_X(n=100, p=10, p_b=2, cov_type="cov_equi", rho=0.2)
 # create linear predictor with first 5 beta-coefficients = 1 (all other zero)
 lp <- generate_lp(X, p_nn = 5, a=1)
 
-# Gaussian
-
-# Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):
+# Simulate response:
 y <- lp + rnorm(100)
 
-# Calculate M independent knockoff feature statistics:
+# Calculate knockoff statistics:
 W <- knockoff.statistics(y=y, X=X, type="regression", M=5)
 
-S = variable.selections(W, error.type = "pfer", level = 1)
+S <- variable.selections(W, error.type = "pfer", level = 1)
 
 # plot heatmap of knockoff selections:
 plot(S)
