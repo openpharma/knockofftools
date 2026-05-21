@@ -6,10 +6,39 @@
 #'
 #' @format A data frame with 2000 rows and 33 variables:
 #' \describe{
-#'   \item{Tc}{Treatment indicator}
-#'   \item{X1--X30}{Covariates}
-#'   \item{Yb}{Binary outcome}
 #'   \item{Yg}{Continuous outcome}
+#'   \item{Yb}{Binary outcome}
+#'   \item{Tc}{Treatment indicator}
+#'   \item{X1}{Covariate 1}
+#'   \item{X2}{Covariate 2}
+#'   \item{X3}{Covariate 3}
+#'   \item{X4}{Covariate 4}
+#'   \item{X5}{Covariate 5}
+#'   \item{X6}{Covariate 6}
+#'   \item{X7}{Covariate 7}
+#'   \item{X8}{Covariate 8}
+#'   \item{X9}{Covariate 9}
+#'   \item{X10}{Covariate 10}
+#'   \item{X11}{Covariate 11}
+#'   \item{X12}{Covariate 12}
+#'   \item{X13}{Covariate 13}
+#'   \item{X14}{Covariate 14}
+#'   \item{X15}{Covariate 15}
+#'   \item{X16}{Covariate 16}
+#'   \item{X17}{Covariate 17}
+#'   \item{X18}{Covariate 18}
+#'   \item{X19}{Covariate 19}
+#'   \item{X20}{Covariate 20}
+#'   \item{X21}{Covariate 21}
+#'   \item{X22}{Covariate 22}
+#'   \item{X23}{Covariate 23}
+#'   \item{X24}{Covariate 24}
+#'   \item{X25}{Covariate 25}
+#'   \item{X26}{Covariate 26}
+#'   \item{X27}{Covariate 27}
+#'   \item{X28}{Covariate 28}
+#'   \item{X29}{Covariate 29}
+#'   \item{X30}{Covariate 30}
 #' }
 #'
 #' @source Simulated using \code{generate_simdata()}
