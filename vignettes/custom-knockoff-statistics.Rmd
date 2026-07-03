@@ -1,0 +1,566 @@
+---
+title: "Writing custom knockoff statistics"
+author: "Maike Ahrens, Sebastian Voss"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{custom-knockoff-statistics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+options(rmarkdown.html_vignette.check_title = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+## Scope
+
+The `knockoff.statistics()` function can be used with custom knockoff statistics
+provided via the `statistic` argument. This allows 
+for full flexibility with respect to the choice of modelling approach and/or 
+feature importance measures, for instance to achieve consistency 
+with existing workflows and downstream analyses.
+
+Currently, `knockofftools` ships the following knockoff filters:
+
+* Prognostic filters  
+  * `stat_glmnet()`  
+  * `stat_random_forest()`  
+* Predictive filters
+  * `stat_predictive_glmnet()`  
+  * `stat_predictive_causal_forest()`  
+
+This vignette outlines two levels of customization of the knockoff statistic 
+computation:
+
+1. Providing a custom filter function `stat_custom()` to be passed directly to 
+`knockoff.statistics()` without further changes to the workflow. 
+The worked example here covers the `{ranger}` implementation for a prognostic
+filter (see [here](#lev1)). 
+1. A version for the advanced user that wants to access intermediate results 
+from the modelling and/or importance computing steps. To this end, one needs to 
+conduct the individual steps wrapped in the package's work horse 
+function `knockoff.statistics()` (see [here](#lev2)).
+
+
+Start by loading the package and any additional dependencies
+for the custom statistic.
+
+```{r setup, message = FALSE}
+library(knockofftools)
+# dependencies for the custom statistic; adjust as needed
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(ranger)
+library(stringr)
+library(forcats)
+# for Shapley value computation of tree-based models
+library(treeshap)
+# for analysis of survival outcomes
+library(survival)
+
+```
+
+
+<!-- The knockoff filter requires a *feature statistic* $W_j$ for each predictor $j$. -->
+<!-- while a near-zero or negative value suggests that $X_j$ and its knockoff copy -->
+<!-- $\tilde{X}_j$ are exchangeable without meaningful loss of information. -->
+
+## Level 1: Custom knockoff statistic {#lev1}
+
+### The `stat_*()` interface {#stat-skeleton}
+
+Let's start with the general structure of a function that can be
+passed to `knockoff.statistics()` as a custom statistic, 
+particularly its input arguments and the output it needs to return 
+before going over its individual components in the next paragraphs.
+
+Any function satisfying this interface can be passed to `knockoff.statistics()` 
+via the `statistic` argument.
+
+We are using [roxygen2](https://roxygen2.r-lib.org/)-style comments to
+document the function.
+
+
+```{r, eval = FALSE}
+#' Custom knockoff feature statistic
+#'
+#' Computes a vector of feature statistics \eqn{W_j} that measure the
+#' association between each predictor \eqn{X_j} and the response, adjusted
+#' for its knockoff copy \eqn{\tilde{X}_j}. Positive, large values of `W_j` are
+#' evidence that predictor `X_j` is associated with the response 
+#' while a near-zero or negative value suggests that $X_j$ and its knockoff copy
+#' $\tilde{X}_j$ are exchangeable without meaningful loss of information. 
+#'
+#' @param X `data.frame` of original predictors (numeric and/or factor columns).
+#' @param X_k `data.frame` knockoff copy of `X`, same dimensions and column  
+#' types as `X`. Consider the knockoff generation done at the point when  
+#' `stat_custom()` is called (handled earlier in [knockoff.statistics()])
+#' @param y response vector of length `nrow(X)` or `Surv` object 
+#' (from package `survival`). numeric, binary `factor`, or `Surv` object.
+#' @param type character string describing the outcome type. one of `"regression"` (the default), 
+#' `"classification"`, or `"survival"`.
+#' @param ... optional arguments forwarded from `knockoff.statistics()` to 
+#' control modelling and importance computation.
+#'
+#' @return A `data.frame` with a single column `W` (one row per predictor) and
+#' `rownames` equal to `colnames(X)`.
+ 
+stat_custom <- function(X, X_k, y, type = "regression", ...) {
+  
+  # <input checks> 
+  # <swapping for unbiased statistic>
+  
+  # <modelling and importance computation>
+  
+  # <return> 
+}
+```
+
+## Worked example: `stat_ranger()`
+
+For this vignette's example, a random forest is trained via 
+(`ranger::ranger()`) and uses the built in option to compute 
+permutation importance to derive importance scores for the knockoff filter. 
+We build it in layers so each design decision is visible.
+In comparison to the built-in `stat_random_forest()`, besides it 
+fast implementation offers more commonly used options for splitrules, 
+for instance.
+
+#### Step 1: helper functions for modeling and scoring
+
+The `scores_ranger()` function will be called inside the `stat_ranger()`
+function. It takes care of fitting the random forest 
+on the combined predictor matrix (original and knockoffs) and computing 
+the importance values and it returns a named vector of permutation importance 
+values, one per feature in the input matrix.
+The function's scope mimics the existing score computation functions 
+in the package, e.g. `scores_glmnet()`.
+
+
+```{r, eval = !FALSE}
+
+model_ranger <- function(X, y, type = "regression", ...) {
+  # tackle potential errors specific to your modeling function of choice
+
+  colnames(X) <- make.unique(colnames(X))  # ranger requires unique column names
+
+  # Only forward arguments that ranger::ranger() actually accepts;
+  # silently drop anything else to keep the interface safe when used
+  # with knockoff.statistics() which may forward unrelated arguments.
+  dots <- rlang::list2(...) %>%
+    purrr::keep_at(rlang::fn_fmls_names(ranger::ranger))
+
+  # handling of all three outcome types
+  if (type == "survival") {
+    rf_data    <- data.frame(time = y[, 1], status = y[, 2], X)
+    rf_formula <- stats::as.formula("survival::Surv(time, status) ~ .")
+  } else {
+    rf_data    <- data.frame(y = y, X)
+    rf_formula <- stats::as.formula("y ~ .")
+  }
+  
+  do.call(
+    ranger::ranger,
+    list(
+      formula    = rf_formula,
+      data       = rf_data,
+      importance = "permutation",
+      num.trees  = 500,
+      mtry       = ncol(X)   # all columns; X is cbind(X_orig, X_knock) here
+    ) %>% 
+      # allow updating defaults such as num.trees via ...
+      purrr::list_assign(!!! dots)
+  )
+  
+}
+
+# the composed internal function for your custom knockoff statistic
+scores_ranger <- function(X, y, type = "regression", ...) {
+  
+  # MODELLING
+  rf_fit <- model_ranger(X = X, y = y, type = type, ...)
+  
+  # VARIABLE IMPORTANCE
+  ranger::importance(rf_fit)
+  
+}
+```
+
+**Notes**: 
+
+* Think of the function `scores_ranger()` as a generalization of your existing
+workflow to obtain variable importances, independent of the knockoff 
+application. The specifics for that will be handled outside of this function. 
+
+* Handle all three `type` values if you intend the statistic to be
+general-purpose. At minimum, throw an informative error for unsupported types
+rather than letting the underlying model fail with a cryptic message.
+
+* Similarly, handle all known potential issues related to your modelling and 
+importance computation steps. This might be input checks related to naming
+conventions for instance, but also related to the output say if your model 
+did not converge or importances could not be computed.
+
+* Consider splitting modelling and importance computation steps in separate 
+functions to help with testing and maintenance. In this case, both are handled
+directly by the `ranger::ranger()` call and we omit writing a separate function 
+for the importance.  
+
+* If shapley values are the preferred importance measure, 
+the `treeshap` package can be used
+
+```{r}
+scores_ranger_shap <- function(X, y, type = "regression", ...) {
+  
+  # MODELLING as before   
+  rf_fit <- model_ranger(X = X, y = y, type = type, importance = "none", ...)
+  
+  # VARIABLE IMPORTANCE
+  treeshap::treeshap(
+    treeshap::ranger.unify(
+      rf_fit, 
+      X %>% purrr::set_names(., make.unique(colnames(.))) %>% as.matrix()
+    ), 
+    X %>% purrr::set_names(., make.unique(colnames(.))) %>% as.matrix()
+  )$shaps %>% 
+    colMeans() %>% 
+    abs()
+}
+```
+
+
+* If you decide to write a custom statistic function for your engine
+and/or importance measure of choice, you are most likely very familiar 
+with their behavior and the potential pitfalls. 
+These may range from formal requirements to the input structure to 
+computational issues that may arise during the fitting or importance computation steps.
+For instance, [ranger::ranger()] requires unique column names for the
+input data and feature input to the custom statistic is a data set in which each
+column name is duplicated (the generated knockoff data have the same column 
+names as the original variables).
+A lot harder to catch is the issue that in rare cases, 
+NaN values may be returned for some out-of-bag predictions leading to 
+missing values for variable importances. 
+Make sure to catch potential errors and handle them gracefully, avoiding the 
+computation to exit and render already completed knockoff iterations useless.
+You may want to have a look into `purrr::safely()`, which may come in handy.
+The details for making `stat_ranger()` bullet-proof will be skipped here, 
+but handled in the implementation that will be 
+part of an upcoming `{knockofftools}` release.
+
+
+#### Step 2: `stat_ranger()` wraps helpers and eliminates bias
+
+Fitting the forest naively on `cbind(X, X_k)` can introduce a directional
+bias: the original columns always appear before the knockoff columns, so the
+model may exploit column position rather than content. The standard fix is to
+independently randomize which of $X_j$ and $\widetilde{X}_j$ occupies each
+position before fitting, then correct the sign of $W_j$ afterwards.
+
+Once `scores_ranger()` is in place, we wrap it in the `stat_ranger()`
+function with the following structure (see [above](#stat-skeleton)): 
+
+1. **Random swap**: for each $j$, exchange $X_j \leftrightarrow \widetilde{X}_j$
+   with probability 0.5, independently across variables.
+1. **Fit**: random forest on 
+  $\text{cbind}(X_{\text{swap}},\,\widetilde{X}_{\text{swap}})$; 
+  extract permutation importance for all $2p$
+   columns.
+1. **Difference**: $W_j = \text{imp}_j - \widetilde{\text{imp}}_j$.
+1. **Sign correction**: multiply by $(1 - 2\, \cdot \mathbf{1}_{\text{swap}_j})$ to
+   restore the correct orientation after the swap.
+
+
+```{r, eval = !FALSE}
+stat_ranger <- function(X, X_k, y, type = "regression", ...) {
+
+  # input checks
+  check_design(X); check_design(X_k)
+  
+  # 1. Randomly swap original and knockoff columns
+  swap    <- as.logical(rbinom(ncol(X), size = 1, prob = 0.5))
+  X_swap  <- X;   X_swap[, swap]  <- X_k[, swap]
+  Xk_swap <- X_k; Xk_swap[, swap] <- X[, swap]
+  
+  # 2. Fit the forest on the combined matrix and extract importance
+  imp <- scores_ranger_shap( # scores_ranger
+    X    = cbind(X_swap, Xk_swap),
+    y    = y,
+    type = type,
+    ...
+  )
+
+  # 3. Oftentimes, knockoff statistic is difference between 
+  # original and knockoff importance
+  p    <- ncol(X)
+  orig <- seq_len(p)
+  W    <- imp[orig] - imp[orig + p]
+
+  # 4. Correct for swapped columns: flip the sign where columns were exchanged
+  W <- W * (1 - 2 * swap)
+
+  data.frame(W = W, row.names = colnames(X))
+}
+```
+
+
+
+
+#### Step 3: end-to-end usage
+
+Starting with a simulated dataset using the package's helper functions:
+
+```{r, eval = !FALSE}
+set.seed(1024)
+X  <- generate_X(n = 200, p = 10, p_b = 0, cov_type = "cov_equi", rho = 0.3) 
+lp <- generate_lp(X, p_nn = 3, a = 1) 
+y  <- lp + rnorm(nrow(X))
+```
+
+Generate multiple knockoffs via `knockoff.statistics()` and
+call `knockoff.statistics()` with our custom statistic `stat_ranger()`:
+
+
+```{r}
+W <- knockoff.statistics(
+  y         = y,
+  X         = X,
+  type      = "regression",
+  M         = 2,
+  statistic = "stat_ranger"
+)
+
+S <- variable.selections(W, error.type = "pfer", level = 2)
+S$stable.variables
+```
+
+
+```{r, fig.height = 5}
+plot(S)
+```
+
+Additional `ranger::ranger()` arguments can be forwarded through `...`:
+
+```{r, eval = FALSE}
+# 1000 trees with a fixed internal seed
+stat_ranger(X, X_k, y, type = "regression", num.trees = 1000, seed = 99)
+```
+
+### Survival and classification outcomes
+
+`stat_ranger()` handles all three `type` values that `knockofftools` recognizes:
+
+```{r, eval = FALSE}
+# Classification
+yb  <- factor(rbinom(nrow(X), 1, plogis(lp)))
+X_k <- knockoff(X)
+stat_ranger(X, X_k, yb, type = "classification")
+
+# Survival (requires the survival package)
+ys  <- simulWeib(N = nrow(X), lambda0 = 0.01, rho = 1, lp = lp)
+X_k <- knockoff(X)
+stat_ranger(X, X_k, ys, type = "survival")
+```
+
+### Making your statistic available to `knockoff.statistics()`
+
+`knockoff.statistics()` resolves the `statistic` argument via `get()`, so your
+function only needs to be on the search path at the time `knockoff.statistics()`
+is called. There are two common patterns.
+
+**Script or interactive session**: define the function before calling
+`knockoff.statistics()`, either in the console or via `source()` when your 
+functions live in a separate R file.
+
+**R package**: for a hypothetical extension package `{knockoffranger}`
+that contains `stat_ranger()`, simply make sure to 
+export the function, install and attach the package, then pass
+its name as a string:
+
+```{r, eval = FALSE}
+library(knockoffranger)   # exports stat_ranger()
+W <- knockoff.statistics(y, X, statistic = "stat_ranger", M = 5)
+```
+
+Having the custom extension live in its own package has major benefits for 
+sharing, testing and maintenance. 
+
+
+## Level 2: Custom statistic with full flexibility in a manual workflow {#lev2}
+
+Previously, we have shown how to implement a custom knockoff statistic, 
+where the user is free to choose a combination of modelling engine and
+importance metric. 
+The output of `knockoff.statistics(statistic = "stat_ranger")`
+however is still limited to the most streamlined version, which is the 
+importance table of each variable per iteration. 
+
+Here, we present a more granular manual workflow that allows 
+for the extraction of additional information from the workflow. 
+This is primarily of interest to the users who are more advanced in 
+the machine learning field, and are keen to better understand for example how
+the introduction of the knockoff variables affects their models, 
+for example in terms of performance. 
+Another simple extraction of interest might be the $2p$ vector of individual
+importances for original and knockoff variables before their 
+aggregation.
+
+In the following, we'll extract this information alongside the
+knockoff statistics $W$. 
+
+
+```{r, fig.height=5}
+# simulate original dataset
+set.seed(1)
+X   <- generate_X(n = 100, p = 10, p_b = 0, cov_type = "cov_equi", rho = 0.3)
+p   <- ncol(X)
+lp  <- generate_lp(X, p_nn = 3, a = 1)
+y   <- lp + rnorm(nrow(X))
+
+# generate knockoff data sets (M iterations)
+M    <- 5
+X_ks <- purrr::map(
+  1:M, 
+  ~ {set.seed(.x); knockoff(X)}
+)
+
+# draw swaps for columns of X and Xk
+swaps <- purrr::map(
+  1:M, 
+  ~as.logical(rbinom(p, 1, 0.5))
+)
+
+# swapping helper
+swap_it <- function(X, X_k, swap){ # , rename_ko = TRUE
+  
+  # check 
+  # dim(X) == dim(X_k)
+  # swap logical of length ncol(X)
+  
+  # generate modified versions of original and knockoff matrix
+  X_swap  <- X;  
+  X_swap[,swap] <- X_k[,swap]
+  names(X_swap)[swap] <- paste0(names(X)[swap],  "_ko")
+  
+  Xk_swap <- X_k; 
+  Xk_swap[,swap] <- X[,swap]
+  Xk_swap <- Xk_swap
+  names(Xk_swap)[!swap] <- paste0(names(X)[!swap],  "_ko")
+
+  list(
+    data = cbind(X_swap, Xk_swap), 
+    swap = swap
+  )
+  
+}
+
+
+# initiate result dataframe for knockoff statistics from each iteration m = 1, ..., M
+# fully in line with what knockoff.statistics() returns
+# for compatibility with downstream usage, e.g. variable.selections(W)
+W <- matrix(
+  NA, 
+  nrow = p, ncol = M, 
+  dimnames = list(colnames(X), paste0("W", 1:M))
+) %>% 
+  as.data.frame()
+
+# the manual workflow allows for the extraction of additional information, 
+# the user has no access to in the standard workflow
+# initiate list to store this information for each iteration
+custom_info <- list()
+  
+for (i in 1:M) {
+  # i <- 1
+  
+  swap_result <- swap_it(X, X_ks[[i]], swaps[[i]]) # , rename_ko = TRUE
+  X_imp <- swap_result$data
+  
+  # modelling
+  # using ranger engine like in simple customization example
+  custom_model <- ranger::ranger(
+    x = X_imp, 
+    y = y, 
+    num.trees  = 100, # not recommended for practical application
+    importance = "permutation"
+  )
+  
+  # variable importances
+  # example using {treeshap} package for computation of Shapley values
+  # individual contributions are averaged to obtain per variable importance
+  custom_scores <- treeshap::treeshap(
+    treeshap::ranger.unify(custom_model, as.matrix(X_imp)), 
+    as.matrix(X_imp), 
+    verbose = FALSE 
+  )$shaps %>% 
+  colMeans()
+  # custom_scores
+  
+  # Compute custom statistic W 
+  # difference in absolute mean Shapley values
+  orig <- 1:p
+  custom_importance <- (abs(custom_scores[orig]) - abs(custom_scores[orig + p])) *
+    # correct for swapping of columns of X and Xk
+    (1 - 2*swap_result$swap) %>% 
+    rlang::set_names(names(X))
+
+  W[,i] <- custom_importance
+  
+  custom_info[[i]] <- list(
+    importance = list(
+      permutation  = custom_model$variable.importance %>% 
+        magrittr::set_attr("mode", custom_model$importance.mode),
+      shapley = custom_scores
+    ) %>% 
+      as.data.frame() %>% 
+      # optional cosmetics
+      {
+        if (require(naturalsort)) {
+          {.[naturalsort::naturalsort(rownames(.)),]} %>% 
+            {.[c(stringr::str_subset(rownames(.), "\\d$"), stringr::str_subset(rownames(.), "ko$")),]}
+        } else {.} 
+      }, 
+    pred_error = custom_model$prediction.error,
+    pred_oob   = custom_model$predictions
+  )
+}
+
+W 
+
+# the object W contains custom statistics and can be passed to downstream methods
+S <- variable.selections(W, error.type = "pfer", level = 3)
+
+plot(S)
+```
+
+
+```{r, fig.height = 5, fig.width = 5.25}
+# summary of prediction errors across iterations
+custom_info %>% purrr::map_dbl("pred_error") %>% summary()
+
+# visual comparison of importance metrics per variable in a facets per metric   in a boxplot
+custom_info %>% 
+  purrr::map("importance") %>% 
+  purrr::map(~ tidyr::pivot_longer(.x %>% tibble::rownames_to_column("feat"), cols = -feat, names_to = "metric", values_to = "importance") ) %>% 
+  list_rbind(names_to = "iter") %>% 
+  mutate(
+    type = ifelse(feat %>% stringr::str_detect("ko$"), "knockoff", "original") %>% factor(levels = c("original", "knockoff")), 
+    variable = stringr::str_remove(feat, "_ko$") %>% forcats::fct_relevel(colnames(X) %>% rev())
+  ) %>% 
+  
+  ggplot(aes(x = importance, y = variable, fill = type)) +
+  geom_vline(mapping = aes(xintercept = 0), linetype = "dashed", color = "grey") +
+  geom_boxplot(position = position_dodge2()) +
+  facet_wrap(~ metric, scales = "free_x") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values = c("original" = "steelblue", "knockoff" = "salmon")) + 
+  labs(title = paste0("Comparison of importance metrics (", M, " iterations)"))
+```
+
