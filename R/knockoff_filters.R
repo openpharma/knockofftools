@@ -4,10 +4,13 @@
 #' The function first calculates M independent knockoff copies (Xk1, ..., XkM) of the covariate matrix (X) and then calculates the knockoff
 #' feature statistics W1, ..., WM. By default each feature statistic is calculated via the parameter
 #' statistic=knockofftools::stat_glmnet, but user may write and supply their own feature statistics functions
-#' (e.g. random forest variable importance difference). The user may additionally supply fixed effects (X.fixed)
+#' (e.g. random forest variable importance difference, `?vignette("custom-knockoff-statistics", package = "knockofftools")`).
+#'  The user may additionally supply fixed effects (X.fixed)
 #' that should always be included in the underlying model (e.g. covariates to adjust for).
 #'
-#' If multiple knockoffs are desired (M > 1) then the method utilizes the clustermq package for parallel distribution of jobs on HPC scheduler. See \href{https://mschubert.github.io/clustermq/articles/userguide.html}{clustermq-userguide}
+#' If multiple knockoffs are desired (M > 1) then the method utilizes
+#' the clustermq package for parallel distribution of jobs on HPC scheduler.
+#' See \href{https://mschubert.github.io/clustermq/articles/userguide.html}{clustermq-userguide}
 #' for further details on how to configure (differently from defaults) clustermq scheduler and batch templates.
 #'
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric", binary "factor", or survival ("Surv") object.
@@ -16,7 +19,7 @@
 #' @param M the number of independent knockoff feature statistics that should be calculated.
 #' @param knockoff.method what type of knockoffs to calculate. Defaults to sequential knockoffs, knockoff.method="seq", with other options: knockoff.method="sparseseq" and knockoff.method="mx".
 #' The "mx" method only works if all columns of the X matrix are continuous.
-#' @param statistic knockoff feature statistic function, defaults to glmnet coefficient difference (statistic="stat_glmnet"; see ?stat_glmnet). Other options include statistic="stat_random_forest" (see ?stat_random_forest), statistic="stat_predictive_glmnet" (see ?stat_predictive_glmnet) or statistic="stat_predictive_causal_forest" (see ?stat_predictive_causal_forest).
+#' @param statistic knockoff feature statistic function, defaults to glmnet coefficient difference (statistic="stat_glmnet"; see ?stat_glmnet). Other options include statistic="stat_random_forest" (see ?stat_random_forest), statistic="stat_predictive_glmnet" (see ?stat_predictive_glmnet), statistic="stat_predictive_causal_forest" (see ?stat_predictive_causal_forest) or a custom statistic (see details).
 #' @param trt binary treatment (factor) variable required if statistic involves a predictive knockoff filter (i.e. if statistic="stat_predictive_glmnet" or statistic="stat_predictive_causal_forest")
 #' @param gcm logical indicator for whether a Gaussian Copula Model should be applied. Defaults to TRUE since the underlying knockoff generation mechanism for numeric variables is based on multivariate Gaussian variables.
 #' When gcm=TRUE each numeric variable is normal score transformed resulting in marginal standard normal variables. The knockoff filter then acts in this transformed variable space. User is advised not to change this parameter unless he/she understands the consequences.

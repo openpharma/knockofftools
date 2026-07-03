@@ -1,40 +1,47 @@
 Package: knockofftools
 Title: Knockoffs Utility Tools
 Version: 1.0.0
-Authors@R: 
-    c(person(given = "Matthias",
-           family = "Kormaksson",
-           role = c("aut", "cre"),
-           email = "matthias-1.kormaksson_ext@novartis.com"),
-      person(given = "Kostas",
-           family = "Sechidis",
-           role = "aut"),
-      person(given = "Manuela",
-           family = "Zimmermann",
-           role = "aut"))
-Description: A suite of knockoffs functions and methods from existing R-packages and papers. Some of the R functions are simple wrapper functions, while others are novel implementations of recent methods.
+Authors@R: c(
+    person("Matthias", "Kormaksson", , "matthias-1.kormaksson_ext@novartis.com", role = c("aut", "cre")),
+    person("Kostas", "Sechidis", role = "aut"),
+    person("Manuela", "Zimmermann", role = "aut")
+  )
+Description: A suite of knockoffs functions and methods from existing
+    R-packages and papers. Some of the R functions are simple wrapper
+    functions, while others are novel implementations of recent methods.
 License: GPL-2
+URL: http://opensource.nibr.com/knockofftools/
+Depends: 
+    R (>= 3.6.0)
+Imports:
+    clustermq (>= 0.8.8),
+    CVglasso (>= 1.0),
+    dplyr (>= 0.7.8),
+    ggplot2 (>= 3.2.0),
+    glmnet (>= 3.0),
+    grf (>= 2.3.1),
+    knockoff (>= 0.3.2),
+    magrittr (>= 1.5),
+    nnet (>= 7.3-18),
+    randomForestSRC (>= 2.9.1),
+    survival (>= 2.44.1.1)
+Suggests: 
+    callr,
+    forcats,
+    knitr,
+    naturalsort,
+    purrr,
+    ranger,
+    rlang,
+    rmarkdown,
+    stringr,
+    testthat (>= 3.0.0),
+    tibble,
+    tidyr,
+    treeshap
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.6.0)
-Imports:
-    dplyr (>= 0.7.8),
-    glmnet (>= 3.0),
-    knockoff (>= 0.3.2),
-    clustermq (>= 0.8.8),
-    ggplot2 (>= 3.2.0),
-    survival (>= 2.44.1.1),
-    randomForestSRC (>= 2.9.1),
-    grf (>= 2.3.1),
-    CVglasso (>= 1.0),
-    nnet (>= 7.3-18),
-    magrittr (>= 1.5)
 RoxygenNote: 7.3.3
-Suggests: 
-    knitr,
-    rmarkdown,
-    callr,
-    testthat (>= 3.0.0)
-VignetteBuilder: knitr
-Config/testthat/edition: 3
-URL: http://opensource.nibr.com/knockofftools/

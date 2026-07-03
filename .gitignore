@@ -13,3 +13,5 @@ inst/doc
 
 # pkgdown site
 docs/
+
+*.html
