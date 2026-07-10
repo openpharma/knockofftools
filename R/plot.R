@@ -42,18 +42,32 @@ plot.variable.selections <- function(x, ..., nbcocluster=c(7,7)) {
 
   S <- x
 
-  if (class(S)[1]!="variable.selections") {
-    stop("Input S must be of class \'variable.selections\'. Please see ?variable.selections.")
+  # Check x is of class variable.selections to use components 'selected' and 'stable.variables'
+  if (!inherits(x, "variable.selections")) {
+    stop("Input x must be of class \'variable.selections\'. Please see ?variable.selections.")
   }
 
   stable.vars <- S$stable.variables
-
   S <- S$selected
+  if (ncol(S) < 2 || nrow(S) < 2) {
+    stop("Input x must have at least 2 knockoff repetitions and 2 variables to plot the clustered heatmap.")
+  }
 
+  # Basic checks on nbcocluster ensuring clustering doesn't fail
+  stopifnot(
+    is.numeric(nbcocluster),
+    length(nbcocluster) == 2,
+    all(nbcocluster > 0)
+  )
   # Make sure user doesn't specify more clusters than data to support:
   nbcocluster <- pmin(nbcocluster, dim(S))
 
-  selections <- data.frame(draw = factor(rep(rep(1:ncol(S)),each=nrow(S))),
+  axis.text.y.color <- list(
+    selected     = "firebrick2",
+    not_selected = "black"
+  )
+
+  selections <- data.frame(draw = factor(rep(1:ncol(S),each=nrow(S))),
                            variable = factor(rownames(S)),
                            selected = as.numeric(as.matrix(S)))
 
@@ -68,7 +82,7 @@ plot.variable.selections <- function(x, ..., nbcocluster=c(7,7)) {
   meta.draw <- selections %>%
     dplyr::group_by(drawclass) %>%
     dplyr::summarise(selected = mean(selected)) %>%
-    dplyr::arrange(desc(selected))
+    dplyr::arrange(dplyr::desc(selected))
 
   # Calculate means per variable block (to order heatmap)
   meta.var <- selections %>%
@@ -82,20 +96,104 @@ plot.variable.selections <- function(x, ..., nbcocluster=c(7,7)) {
                   variable = factor(variable, levels = as.character(meta.var$variable))) %>%
     dplyr::arrange(drawclass) %>%
     dplyr::mutate(draw = factor(draw, levels = unique(draw))) %>%
-    dplyr::arrange(variable)
+    dplyr::mutate(
+      draw_plot = match(draw, levels(draw)),
+      selected = factor(selected, levels = 0:1, labels = c("no", "yes")),
+      variable_colored_label = ifelse(
+        variable %in% stable.vars,
+        paste0("<b><span style='color:", axis.text.y.color$selected,     ";font-weight:bold;'>", variable, "</span></b>"),
+        paste0(   "<span style='color:", axis.text.y.color$not_selected, ";font-weight:bold;'>", variable, "</span>")
+      ) # forcats::fct_reorder(as.numeric(variable))
+      ) %>%
+    dplyr::arrange(variable) %>%
+    dplyr::mutate(
+      variable_colored_label = factor(
+        variable_colored_label,
+        levels = unique(variable_colored_label)
+        )
+    )
 
-  selections$selected <- factor(selections$selected)
+  if (utils::packageVersion("ggplot2") >= "3.5.0") {
 
-  # vectorized input to ggplot2::element_text() will likely be deprecated:
-  axis.text.y.color <- ifelse(unique(selections$variable) %in% stable.vars, "red", "black")
+    ggplot2::ggplot(
+      data = selections,
+      mapping = ggplot2::aes(x = draw_plot, y = as.numeric(variable_colored_label))
+    ) +
+      ggplot2::geom_tile(ggplot2::aes(fill = selected)) +
+      ggplot2::scale_fill_manual(
+        values = c("no" = "#132B43", "yes" = "#56B1F7")
+      ) +
+      ggplot2::scale_x_continuous(
+        expand = 0,
+        breaks = seq(1, ncol(S), by = 1),
+        minor_breaks = seq(1.5, ncol(S) - 0.5, by = 1)
+      ) +
+      ggplot2::scale_y_continuous(
+        expand = 0,
+        labels = levels(selections$variable_colored_label),
+        breaks = seq(1, nrow(S), by = 1),
+        minor_breaks = seq(1.5, nrow(S) - 0.5, by = 1)
+      ) +
+      ggplot2::labs(
+        x = "knockoff repetition (reordered)",
+        y = "variable (stable selections colored in red)"
+      ) +
+      ggplot2::guides(
+        x = ggplot2::guide_axis(minor.ticks = TRUE),
+        y = ggplot2::guide_axis(minor.ticks = TRUE)
+      ) +
+      ggplot2::theme(
+        panel.background = ggplot2::element_blank(),
+        panel.grid = ggplot2::element_blank(),
+        axis.text.x  = ggplot2::element_blank(),
+        axis.text.y  = ggtext::element_markdown(),
+        axis.ticks.x = ggplot2::element_blank(),
+        axis.ticks.y = ggplot2::element_blank(),
+        axis.minor.ticks.x.bottom = ggplot2::element_line(linewidth = ggplot2::rel(1)),
+        axis.minor.ticks.y.left = ggplot2::element_line(linewidth = ggplot2::rel(1)),
+      )
 
-  ggplot2::ggplot(data=selections, mapping=ggplot2::aes(x = draw, y = variable)) +
-    ggplot2::geom_tile(ggplot2::aes(fill = selected)) +
-    ggplot2::xlab("knockoff repetition") +
-    ggplot2::ylab("variable (stable selections colored in red)") +
-    ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-                   axis.text.y =  ggplot2::element_text(colour = axis.text.y.color),
-                   axis.ticks.x = ggplot2::element_blank()) +
-    ggplot2::scale_fill_manual(values=c("0"="#132B43","1"="#56B1F7"))
+  } else {
 
+    message(
+      "You are currently using ggplot2 version ",
+      utils::packageVersion("ggplot2"), ".\n",
+      "Consider upgrading to at least version 3.5.0. for an updated plot version."
+    )
+
+    lbl_var_marked <- levels(selections$variable) %>%
+      paste0(ifelse(levels(selections$variable) %in% stable.vars, "*", ""))
+
+    selections %>%
+      dplyr::mutate(variable = factor(variable, labels = lbl_var_marked)) %>%
+      ggplot2::ggplot(mapping = ggplot2::aes(x = draw, y = variable)) +
+      ggplot2::geom_tile(ggplot2::aes(fill = selected)) +
+      ggplot2::xlab("knockoff repetition (reordered)") +
+      ggplot2::ylab("variable (stable selections marked with *)") +
+      ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                     axis.ticks.x = ggplot2::element_blank()) +
+      ggplot2::scale_fill_manual(values = c("no" = "#132B43","yes" = "#56B1F7"))
+
+  }
+
+}
+
+
+suppress_warning_vectorized_input_element_text <- function(expr) {
+
+  # Vectorized input to `element_text()` is not officially supported.
+  # ℹ Results may be unexpected or may change in future versions of ggplot2.
+  pattern <- paste0(
+    "Vectorized.input.*element_text.*not.officially.supported.",
+    "Results.*unexpected.*change.*ggplot2."
+  )
+
+  withCallingHandlers(
+    expr,
+    warning = function(w) {
+      if (grepl(pattern, conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
 }
