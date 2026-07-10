@@ -1,6 +1,6 @@
 Package: knockofftools
 Title: Knockoffs Utility Tools
-Version: 1.0.0
+Version: 1.0.0.9000
 Authors@R: 
     c(person(given = "Matthias",
            family = "Kormaksson",
