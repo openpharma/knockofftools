@@ -494,6 +494,8 @@ for (i in 1:M) {
   # variable importances
   # example using {treeshap} package for computation of Shapley values
   # individual contributions are averaged to obtain per variable importance
+  # Note that this example works with only numeric features,
+  # for categorical features, adapt the code to work with {treeshap}
   custom_scores <- treeshap::treeshap(
     treeshap::ranger.unify(custom_model, as.matrix(X_imp)), 
     as.matrix(X_imp), 
