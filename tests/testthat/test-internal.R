@@ -25,3 +25,87 @@ test_that("check_if_continuous works", {
   expect_warning(check_if_continuous(X))
 
 })
+
+# RANGER ----
+test_that("ranger_importance_scores: output structure for regression and classification", {
+
+  skip_if_not_installed("ranger")
+  d <- readRDS(test_path("fixtures", "test_data.rds"))
+
+  # regression: named numeric vector aligned with columns of X
+  result_reg <- ranger_importance_scores(d$X, d$y_g, type = "regression", num.trees = 50)
+  .valid_score(result_reg, d$X)
+
+  # classification: same structure with binary factor response
+  result_cls <- ranger_importance_scores(d$X, d$y_b, type = "classification", num.trees = 50)
+  .valid_score(result_cls, d$X)
+
+})
+
+test_that("ranger_importance_scores: output structure for survival", {
+
+  skip_if_not_installed("ranger")
+  skip_if_not_installed("survival")
+
+  d <- readRDS(test_path("fixtures", "test_data.rds"))
+
+  result_surv <- ranger_importance_scores(d$X, d$y_s, type = "survival", num.trees = 50)
+  .valid_score(result_surv, d$X)
+
+})
+
+test_that("ranger_importance_scores: ... forwarding", {
+
+  skip_if_not_installed("ranger")
+  d <- readRDS(test_path("fixtures", "test_data.rds"))
+
+  # importance = "none" is a valid ranger setting,
+  # but "permutation" is protected with a warning
+  expect_warning(
+    result_no_imp <- ranger_importance_scores(
+      d$X, d$y_g, type = "regression", num.trees = 50,
+      importance = "none"
+    )
+  )
+
+  # unknown args should be silently filtered out by the intersect() call;
+  # result should still have the correct structure
+  result_unknown <- ranger_importance_scores(
+    d$X, d$y_g, type = "regression",
+    num.trees = 50,
+    not_a_ranger_arg = TRUE
+  )
+  .valid_score(result_unknown, d$X)
+
+})
+
+
+test_that("ranger_importance_scores: protected arguments in dots raise warning", {
+
+  skip_if_not_installed("ranger")
+  d <- readRDS(test_path("fixtures", "test_data.rds"))
+
+  expect_warning(
+    ranger_importance_scores(d$X, d$y_g, mtry = 1),
+    "ignored"
+  )
+
+  expect_warning(
+    ranger_importance_scores(d$X, d$y_g, importance = "none"),
+    "ignored"
+  )
+
+})
+
+
+test_that("ranger_importance_scores: invalid type raises an error", {
+
+  skip_if_not_installed("ranger")
+  d <- readRDS(test_path("fixtures", "test_data.rds"))
+  expect_error(
+    ranger_importance_scores(d$X, d$y_g, type = "invalid"),
+    "should be one of"
+  )
+
+})
+

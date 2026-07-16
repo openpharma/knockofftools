@@ -88,6 +88,32 @@ check_normality <- function(X) {
 
 }
 
+check_survival_installed <- function() {
+
+  if (!requireNamespace("survival", quietly = TRUE)) {
+
+    # imitate {cli} style for error message:
+    red_bold <- "\033[1;31m"
+    blue     <- "\033[34m"
+    grey     <- "\033[90m"
+    reset    <- "\033[0m"
+
+    stop(
+      paste0(
+        "\n",
+        red_bold, "! ", reset,
+        "The ", blue, "survival", reset,
+        " package is required for `type = \"survival\"`.\n",
+        blue, "i ", reset,
+        grey, "Install it with `install.packages(\"survival\")`.", reset
+      ),
+      call. = FALSE
+    )
+  }
+}
+
+
+
 #' Select variables based on (heuristic) mode of multiple variable selections
 #'
 #' Do not call this function on its own
@@ -221,6 +247,153 @@ random_forest_importance_scores <- function(X, y, trt, type = "regression"){
 }
 
 
+
+#' Internal function called to return the importance scores from random forest
+#' (ranger)
+#' @inheritParams random_forest_importance_scores
+#' @param max_retry number of times to retry ranger if NaN importance scores are reported. Default is 2.
+#' @param ... additional arguments passed to \code{ranger::ranger}
+#'
+#' @return importance scores
+#' @author Maike Ahrens, Sebastian Voss
+#' @export
+#'
+#' @keywords internal
+ranger_importance_scores <- function(
+    X, y,
+    type = c("regression", "classification", "survival"),
+    max_retry = 2,
+    ...
+) {
+
+  type <- match.arg(type)
+  if (type == "survival") check_survival_installed()
+
+  dots <- list(...) %>%
+    {.[intersect(names(.), formalArgs(ranger::ranger))]} %>%
+    # ignore changes to mtry, importance, x, y with a message
+    ranger_arg_checks()
+
+  # make the column names unique (ranger requirement)
+  colnames(X) <- make.unique(colnames(X))
+
+  if (type == "survival") {
+    rf_data    <- data.frame(time = y[, 1], status = y[, 2], X)
+    rf_formula <- stats::as.formula("survival::Surv(time, status) ~ .")
+  } else {
+    rf_data    <- data.frame(y = y, X)
+    rf_formula <- stats::as.formula("y ~ .")
+  }
+
+  ranger_args <- list(
+    formula = rf_formula,
+    data = rf_data,
+    importance = "permutation",
+    num.trees = 500, # default 500 in ranger() and randomForestSRC::rfsrc()
+    mtry = ncol(X) # default (floor) square root of the number variables.
+  ) %>%
+    modifyList(dots, keep.null = TRUE)
+
+  fit_get_importance <- function(refit = FALSE){
+
+    if (refit) ranger_args$seed <- NULL
+
+    rf <- do.call(
+      ranger::ranger,
+      ranger_args
+    )
+    rf$variable.importance
+  }
+
+  # importances from initial fit
+  imps <- fit_get_importance()
+
+  # recompute if any importances could not be computed (NaN)
+  recompute_count <- 0
+  while(recompute_count <= max_retry) {
+
+    if (!any(is.nan(imps))) break
+
+    imps <- fit_get_importance(refit = TRUE)
+
+    recompute_count <- recompute_count + 1
+  }
+
+  if (any(is.nan(imps))) {
+    warning(
+      paste0(
+        "Some of the importance scores reported by ranger are NaN."
+      ),
+      call. = FALSE
+    )
+
+    # force the run to be ignored as a whole by returning NA for all
+    imps <- rep(NA, ncol(X)) %>% setNames(colnames(X))
+  }
+
+  imps
+
+}
+
+#' Internal function called in ranger_importance_scores to check and
+#' modify arguments for ranger to be suitable for knockoff statistic computation
+#'
+#' @param dots A list of arguments to be passed to \code{ranger::ranger}.
+#'
+#' @return A modified list of arguments with valid importance and mtry settings.
+#' @keywords internal
+
+ranger_arg_checks <- function(dots){
+
+    # check importance is actually computed (valid ranger arg and not "none")
+    valid_ranger_importances <- c("impurity", "impurity_corrected", "permutation")
+    if (isTRUE(!dots$importance %in% valid_ranger_importances)) {
+      importance_fall_back <- "permutation"
+      warning(
+        paste0(
+          "Valid choices for the importance measure for ranger::ranger are: ",
+          paste(valid_ranger_importances, collapse = ", "), ".\n",
+          'Importance measure for ranger::ranger was defined as "',
+          dots$importance, '" and will be ignored.\n',
+          'Computing importance with "', importance_fall_back, '" instead.'
+        )
+      )
+      dots$importance <- importance_fall_back
+    }
+
+
+  # ignore mtry custom value with a message
+  if (!is.null(dots$mtry)) {
+    warning(
+      paste0(
+        "For the computation of the knockoff statistics, mtry should be set to the number of covariates in the ranger call (mtry = ncol(X)).\n",
+        '"', dots$mtry, '"',
+        " was provided instead, but will be ignored. \n"
+        # "If you want to change mtry, please use the manual approach instead. `vignette(custom-knockoff-statistics)`"
+      ),
+      call. = FALSE
+    )
+    dots$mtry <- NULL
+  }
+
+  if (!is.null(dots$y)) {
+    warning(
+      paste0(
+        "For the computation of the knockoff statistics, the formula interface is used for ranger::ranger(). \n",
+        "y inputs will be ignored. \n"
+        # "If you want to change mtry, please use the manual approach instead. `vignette(custom-knockoff-statistics)`"
+      ),
+      call. = FALSE
+    )
+
+    dots$y <- NULL
+  }
+
+  dots
+
+}
+
+
 #' Internal function called to return the importance scores from causal forest
 #'
 #' @param X original data.frame with "numeric" and "factor" columns only.
@@ -273,8 +446,6 @@ causal_forest_importance_scores <- function(X, y, trt, type = "regression", shuf
 
   return(importance_scores)
 }
-
-
 
 
 #' Ratio from Ren et al. (2021) used to derandomized knockoffs.

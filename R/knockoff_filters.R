@@ -378,6 +378,96 @@ stat_random_forest <- function(X, X_k, y, type = "regression",  ...) {
 }
 
 
+#' Knockoff (feature) statistics: Random forest (ranger)
+#'
+#' This function uses the `{ranger}` package to estimate permutation importance
+#' scores from random forest (ranger).
+#' @inheritParams stat_random_forest
+#' @param ... other parameters passed to \code{ranger_importance_scores}.
+#' @inherit stat_random_forest
+#' @export
+#' @examples
+#' library(knockofftools)
+#'
+#' set.seed(1)
+#'
+#' # Simulate 10 Gaussian covariate predictors and 1 factor with 4 levels:
+#' X <- generate_X(n=500, p=10, p_b=0, cov_type="cov_diag", rho=0.2)
+#' X$X11 <- factor(sample(c("A","B","C","D"), nrow(X), replace=TRUE))
+#'
+#' # Calculate the knockoff copy of X:
+#' X_k <- knockoff(X)
+#'
+#' # create linear predictor with first 3 beta-coefficients = 1 (all other zero) and a treatment effect of size 1
+#' lp <- (X$X1 + X$X2 + X$X3)
+#'
+#' # Gaussian
+#'
+#' # Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):
+#' y <- lp + rnorm(nrow(X))
+#'
+#' W <- stat_ranger(X, X_k, y, type = "regression")
+#'
+#' # Cox
+#'
+#' # Simulate from Weibull hazard with with baseline hazard h0(t) = lambda*rho*t^(rho-1) and linear predictor lp:
+#' y <- simulWeib(N=nrow(X), lambda0=0.01, rho=1, lp=lp)
+#'
+#' # Calculate  knockoff feature statistics:
+#' W <- stat_ranger(X, X_k, y, type = "survival")
+#'
+stat_ranger <- function(
+    X,
+    X_k,
+    y,
+    type = c("regression", "classification", "survival"),
+    ...
+) {
+
+  # Check inputs
+  check_design(X)
+  check_design(X_k)
+
+  type <- match.arg(type)
+  dots <- list(...)
+
+  # Randomly swap columns of X and Xk
+  swap <- as.logical(stats::rbinom(ncol(X), 1, 0.5))
+  X_swap <- X
+  X_swap[, swap] <- X_k[, swap]
+  Xk_swap <- X_k
+  Xk_swap[, swap] <- X[, swap]
+
+  # compute importance scores for the combined data
+  importance_score_args <- list(
+    X = cbind(X_swap, Xk_swap),
+    y = y,
+    type = type
+  ) %>%
+    c(dots)
+
+  var_split_imps <- do.call(
+    "ranger_importance_scores",
+    importance_score_args
+  )
+
+  # Compute knockoff statistics W
+  p <- ncol(X)
+  orig <- 1:p
+  W <- var_split_imps[orig] - var_split_imps[orig + p]
+
+  # Correct for swapping of columns of X and Xk
+  W <- W * (1 - 2 * swap)
+
+  # Return a named vector (with variable names)
+  data.frame(
+    W = W,
+    row.names = colnames(X)
+  )
+
+}
+
+
 #' Knockoff (feature) statistics that captues the predictive strength: Absolute coefficient differences between treatment original variables interaction terms and treatment knockoff variables interaction terms
 #'
 #' This function follows the implementation of the stat_glmnet function, but modifies it to focus on the coefficients of the interaction terms with the treatment.
@@ -649,7 +739,6 @@ stat_predictive_causal_forest <- function(X, X_k, y, trt, type = "regression", .
   return(W_predictive.dataframe)
 
 }
-
 
 
 
