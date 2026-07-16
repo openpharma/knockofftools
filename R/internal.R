@@ -345,22 +345,23 @@ ranger_importance_scores <- function(
 
 ranger_arg_checks <- function(dots){
 
-    # check importance is actually computed (valid ranger arg and not "none")
-    valid_ranger_importances <- c("impurity", "impurity_corrected", "permutation")
-    if (isTRUE(!dots$importance %in% valid_ranger_importances)) {
-      importance_fall_back <- "permutation"
-      warning(
-        paste0(
-          "Valid choices for the importance measure for ranger::ranger are: ",
-          paste(valid_ranger_importances, collapse = ", "), ".\n",
-          'Importance measure for ranger::ranger was defined as "',
-          dots$importance, '" and will be ignored.\n',
-          'Computing importance with "', importance_fall_back, '" instead.'
-        )
-      )
-      dots$importance <- importance_fall_back
-    }
+  # check importance is actually computed (valid ranger arg and not "none")
+  valid_ranger_importances <- c("impurity", "impurity_corrected", "permutation")
 
+  if (isTRUE(!dots$importance %in% valid_ranger_importances)) {
+    importance_fall_back <- "permutation"
+    warning(
+      paste0(
+        "Valid choices for the importance measure for ranger::ranger are: ",
+        paste(valid_ranger_importances, collapse = ", "), ".\n",
+        'Importance measure for ranger::ranger was defined as "',
+        dots$importance, '" and will be ignored.\n',
+        'Computing importance with "', importance_fall_back, '" instead.'
+      ),
+      call. = FALSE
+    )
+    dots$importance <- importance_fall_back
+  }
 
   # ignore mtry custom value with a message
   if (!is.null(dots$mtry)) {

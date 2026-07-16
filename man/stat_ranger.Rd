@@ -4,13 +4,7 @@
 \alias{stat_ranger}
 \title{Knockoff (feature) statistics: Random forest (ranger)}
 \usage{
-stat_ranger(
-  X,
-  X_k,
-  y,
-  type = c("regression", "classification", "survival"),
-  ...
-)
+stat_ranger(X, X_k, y, type, ...)
 }
 \arguments{
 \item{X}{original data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.}
@@ -23,49 +17,18 @@ as obtained from y = survival::Surv(time, status).}
 
 \item{type}{should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.}
 
-\item{...}{other parameters passed to \code{ranger_importance_scores}.}
+\item{...}{other parameters passed to \code{ranger::ranger()}
+controlling modelling and the importance metric.}
 }
 \value{
-data.frame with knockoff statistics W as column. The number of rows matches the number of columns (variables) of the data.frame X and the variable names are recorded in rownames(W).
+data.frame with knockoff statistics W as column.
+The number of rows matches the number of columns (variables) of the
+data.frame X and the variable names are recorded in `rownames(W)`.
 }
 \description{
-This function uses the `{ranger}` package to estimate permutation importance
-scores from random forest (ranger).
+This function uses the `{ranger}` package to estimate
+permutation importance scores from random forest (ranger).
 }
-\details{
-If there are factor covariates with multiple levels among columns of X then there will be more columns in model.matrix
-than in the corresponding data.frame (both for original X and its knockoff X_k). In this case, let W_j be the difference
-between the two sums derived by the variable importance (VI) scores associated with covariate j. I.e. if j-th variable
-is factor with K levels then W_j is: sum(|VI_j,1|, ... , |VI_j,K|) - sum(|VI_j1|, ..., |VI_j,K|).
-}
-\examples{
-library(knockofftools)
-
-set.seed(1)
-
-# Simulate 10 Gaussian covariate predictors and 1 factor with 4 levels:
-X <- generate_X(n=500, p=10, p_b=0, cov_type="cov_diag", rho=0.2)
-X$X11 <- factor(sample(c("A","B","C","D"), nrow(X), replace=TRUE))
-
-# Calculate the knockoff copy of X:
-X_k <- knockoff(X)
-
-# create linear predictor with first 3 beta-coefficients = 1 (all other zero) and a treatment effect of size 1
-lp <- (X$X1 + X$X2 + X$X3)
-
-# Gaussian
-
-# Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):
-y <- lp + rnorm(nrow(X))
-
-W <- stat_ranger(X, X_k, y, type = "regression")
-
-# Cox
-
-# Simulate from Weibull hazard with with baseline hazard h0(t) = lambda*rho*t^(rho-1) and linear predictor lp:
-y <- simulWeib(N=nrow(X), lambda0=0.01, rho=1, lp=lp)
-
-# Calculate  knockoff feature statistics:
-W <- stat_ranger(X, X_k, y, type = "survival")
-
+\seealso{
+\code{\link[knockofftools]{stat_random_forest}}
 }

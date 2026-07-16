@@ -378,94 +378,148 @@ stat_random_forest <- function(X, X_k, y, type = "regression",  ...) {
 }
 
 
-#' Knockoff (feature) statistics: Random forest (ranger)
+#' Construction helper for knockoff (feature) statistics
 #'
-#' This function uses the `{ranger}` package to estimate permutation importance
-#' scores from random forest (ranger).
+#' The `stat_custom` function is a helper function that allows
+#' users to define their own knockoff feature statistics by simply
+#' providing a custom modeling and importance function.
+#' `stat_custom` takes care of swapping the original and knockoff variables
+#' before the custom computations which avoids bias introduction in the
+#' the knockoff statistics and corrects the sign of the computed statistics
+#' accordingly before returning them.
+#'
 #' @inheritParams stat_random_forest
-#' @param ... other parameters passed to \code{ranger_importance_scores}.
-#' @inherit stat_random_forest
-#' @export
-#' @examples
-#' library(knockofftools)
+#' @param model_imp function that takes feature input X, the outcome y,
+#' outcome type (regression, classification, survival), and any additional
+#' parameters passed via `...`, fits a model, computes and returns
+#' a vector of variable importance scores.
+#' @param ... Other arguments to be passed to the underlying modeling or
+#' importance function from `model_imp`.
 #'
-#' set.seed(1)
+#' @return data.frame with knockoff statistics W as column.
+#' The number of rows matches the number of columns (variables)
+#' of the data.frame X and the variable names are recorded in rownames(W).
 #'
-#' # Simulate 10 Gaussian covariate predictors and 1 factor with 4 levels:
-#' X <- generate_X(n=500, p=10, p_b=0, cov_type="cov_diag", rho=0.2)
-#' X$X11 <- factor(sample(c("A","B","C","D"), nrow(X), replace=TRUE))
-#'
-#' # Calculate the knockoff copy of X:
-#' X_k <- knockoff(X)
-#'
-#' # create linear predictor with first 3 beta-coefficients = 1 (all other zero) and a treatment effect of size 1
-#' lp <- (X$X1 + X$X2 + X$X3)
-#'
-#' # Gaussian
-#'
-#' # Simulate response from a linear model y = lp + epsilon, where epsilon ~ N(0,1):
-#' y <- lp + rnorm(nrow(X))
-#'
-#' W <- stat_ranger(X, X_k, y, type = "regression")
-#'
-#' # Cox
-#'
-#' # Simulate from Weibull hazard with with baseline hazard h0(t) = lambda*rho*t^(rho-1) and linear predictor lp:
-#' y <- simulWeib(N=nrow(X), lambda0=0.01, rho=1, lp=lp)
-#'
-#' # Calculate  knockoff feature statistics:
-#' W <- stat_ranger(X, X_k, y, type = "survival")
-#'
-stat_ranger <- function(
+stat_custom <- function(
     X,
     X_k,
     y,
     type = c("regression", "classification", "survival"),
+    model_imp,
     ...
 ) {
 
-  # Check inputs
+  # Input checks ####
   check_design(X)
   check_design(X_k)
 
-  type <- match.arg(type)
-  dots <- list(...)
+  type   <- match.arg(type)
+  dots   <- list(...)
 
-  # Randomly swap columns of X and Xk
+  # Swap columns of X and Xk ####
   swap <- as.logical(stats::rbinom(ncol(X), 1, 0.5))
   X_swap <- X
   X_swap[, swap] <- X_k[, swap]
   Xk_swap <- X_k
   Xk_swap[, swap] <- X[, swap]
 
-  # compute importance scores for the combined data
-  importance_score_args <- list(
-    X = cbind(X_swap, Xk_swap),
-    y = y,
-    type = type
-  ) %>%
-    c(dots)
-
+  # Compute importances ####
   var_split_imps <- do.call(
-    "ranger_importance_scores",
-    importance_score_args
+    model_imp,
+    list(X = cbind(X_swap, Xk_swap), y = y, type = type, ...)
   )
 
-  # Compute knockoff statistics W
+  # Compute stats W ####
   p <- ncol(X)
   orig <- 1:p
   W <- var_split_imps[orig] - var_split_imps[orig + p]
 
-  # Correct for swapping of columns of X and Xk
+  # Correct sign for swapping
   W <- W * (1 - 2 * swap)
 
-  # Return a named vector (with variable names)
+  # Return a named vector W ####
   data.frame(
     W = W,
     row.names = colnames(X)
   )
-
 }
+
+
+
+
+# stat_ranger <- function(
+#     X,
+#     X_k,
+#     y,
+#     type = c("regression", "classification", "survival"),
+#     ...
+# ) {
+#
+#   # Check inputs
+#   check_design(X)
+#   check_design(X_k)
+#
+#   type <- match.arg(type)
+#   dots <- list(...)
+#
+#   # Randomly swap columns of X and Xk
+#   swap <- as.logical(stats::rbinom(ncol(X), 1, 0.5))
+#   X_swap <- X
+#   X_swap[, swap] <- X_k[, swap]
+#   Xk_swap <- X_k
+#   Xk_swap[, swap] <- X[, swap]
+#
+#   # compute importance scores for the combined data
+#   importance_score_args <- list(
+#     X = cbind(X_swap, Xk_swap),
+#     y = y,
+#     type = type
+#   ) %>%
+#     c(dots)
+#
+#   var_split_imps <- do.call(
+#     "ranger_importance_scores",
+#     importance_score_args
+#   )
+#
+#   # Compute knockoff statistics W
+#   p <- ncol(X)
+#   orig <- 1:p
+#   W <- var_split_imps[orig] - var_split_imps[orig + p]
+#
+#   # Correct for swapping of columns of X and Xk
+#   W <- W * (1 - 2 * swap)
+#
+#   # Return a named vector (with variable names)
+#   data.frame(
+#     W = W,
+#     row.names = colnames(X)
+#   )
+#
+# }
+
+#' Knockoff (feature) statistics: Random forest (ranger)
+#'
+#' This function uses the `{ranger}` package to estimate
+#' permutation importance scores from random forest (ranger).
+#'
+#' @inheritParams stat_random_forest
+#' @param ... other parameters passed to \code{ranger::ranger()}
+#' controlling modelling and the importance metric.
+#' @seealso \code{\link[knockofftools]{stat_random_forest}}
+#' @return  data.frame with knockoff statistics W as column.
+#' The number of rows matches the number of columns (variables) of the
+#' data.frame X and the variable names are recorded in `rownames(W)`.
+#' @export
+#'
+stat_ranger <- function(X, X_k, y, type, ...) {
+  stat_custom(
+    X = X, X_k = X_k, y = y, type = type,
+    model_imp = "ranger_importance_scores",
+    ...
+  )
+}
+#  purrr::partial(stat_custom, model_imp = "ranger_importance_scores")
 
 
 #' Knockoff (feature) statistics that captues the predictive strength: Absolute coefficient differences between treatment original variables interaction terms and treatment knockoff variables interaction terms
