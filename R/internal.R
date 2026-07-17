@@ -293,7 +293,7 @@ causal_forest_importance_scores <- function(X, y, trt, type = "regression", shuf
 find_ratio <- function(M, eta) {
   ratio = 1
 
-  if (M > 5) {
+  if (M >= 5) {
     eta.ind <- which(round(eta, 2) == eta_list)
     M.ind <- which(M == M_list)
     ratio = M_eta_mat[M.ind, eta.ind]
