@@ -31,6 +31,7 @@ additionally stabilizes the selections by combining their outcomes.
 Knockoffs is a randomized procedure which relies on the construction of synthetic (knockoff) variables.
 This function performs variable selection for multiple knockoffs and then stabilizes the selections by combining their outcomes.
 When the pfer or kfwer error is controlled the derandomizing knockoffs is used, which was introduced by Ret et al. (2021) and provably controls this errors.
+Note that the derandomizing knockoffs is only valid for M <= 100 iterations, so only the first 100 knockoffs (columns of `W`) are used for the selection process.
 When the fdr is controlled the heuristic multiple selection algorithm is used, which was introduced by Kormaksson et al. (2021).
 
 Z. Ren, Y. Wei, & E. Candès, (2021). Derandomizing knockoffs. Journal of the American Statistical Association, 1-11.

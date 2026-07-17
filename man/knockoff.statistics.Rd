@@ -23,7 +23,11 @@ knockoff.statistics(
 
 \item{type}{should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.}
 
-\item{M}{the number of independent knockoff feature statistics that should be calculated.}
+\item{M}{the number of independent knockoff feature statistics that
+should be calculated.
+Note that in order to use the [variable.selection()] function with
+`error.type` "pfer" or "kfwer"
+only the first 100 iterations will be considered.}
 
 \item{knockoff.method}{what type of knockoffs to calculate. Defaults to sequential knockoffs, knockoff.method="seq", with other options: knockoff.method="sparseseq" and knockoff.method="mx".
 The "mx" method only works if all columns of the X matrix are continuous.}

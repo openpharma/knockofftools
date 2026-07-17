@@ -243,7 +243,7 @@ test_that("Test different prognostic knockoff filters", {
   set.seed(6)
   .check.WandV(list(y=y_surv, X=X, type="survival", M=5,
                     statistic="stat_random_forest", trt=NULL,
-                    error.type = "pfer",level=1))
+                    error.type = "pfer", k = NULL, level=1))
 })
 
 
@@ -395,7 +395,7 @@ test_that("Simple test of multi_select", {
 })
 
 
-test_that("Expected errors and warnings", {
+test_that("Expected errors and warnings knockoff.statistics()", {
 
   set.seed(1)
 
@@ -410,6 +410,7 @@ test_that("Expected errors and warnings", {
   yb <- rbinom(100, size=1, prob=exp(lp)/(1+exp(lp)))
   ys <- simulWeib(N=100, lambda0=0.01, rho=1, lp=lp)
 
+  # check_family()  ####
   expect_error(knockoff.statistics(yg, X, type="classification"))
   expect_error(knockoff.statistics(yg, X, type="survival"))
   expect_error(knockoff.statistics(factor(yb), X, type="regression"))
@@ -421,11 +422,13 @@ test_that("Expected errors and warnings", {
   # Error, only accepts X as data.frame or tibble:
   expect_error(knockoff.statistics(yg, as.matrix(X)))
 
+  # check_if_continuous(X) ####
   # If try to supply binary numeric covariates then non-normality warning:
   X_with_numeric_factors <- dplyr::mutate_if(X, is.factor, as.numeric)
   expect_warning(knockoff.statistics(yg, X_with_numeric_factors),
                  "Some of the numeric columns of X have suspiciously few distinct values: n_distinct <= 30. Those columns should perhaps not be treated as continuous variables. Please review carefully and read the documentation about the gcm parameter of the knockoff.statistics function.")
 
+  # check_normality() ####
   # Make one of the numerical variables skewed:
   X_with_7th_covariate_skewed <- X
   X_with_7th_covariate_skewed[,7] <- log(log(X_with_7th_covariate_skewed[,7]+4))
@@ -437,6 +440,10 @@ test_that("Expected errors and warnings", {
   expect_warning(knockoff.statistics(yg, X_with_ties, gcm = FALSE),
                  "Some of the numeric input covariates may have ties and/or may not be normally distributed. This could affect the quality of corresponding knockoffs since they are sampled from a Gaussian distribution. X1 had ties \\(but did not reject normality\\). Please consider applying a normalizing transformation on these variables if needed.")
 
+  # Expect message for M>100 ####
+  expect_message(knockoff.statistics(yg, X, M = 101))
+
+  # check_design() ####
   # What happens if there is only 2 covariates:
   set.seed(1)
 
@@ -454,6 +461,72 @@ test_that("Expected errors and warnings", {
   # Expect same error when calling knockoff.statistics:
   expect_error(knockoff.statistics(y, X), "X should have ncol\\(X\\) > 2")
 
+})
+
+test_that("Expected errors and warnings variable.selections()", {
+
+  mock_W_ok  <- matrix(rnorm(50*100), nrow = 50, ncol = 100) %>% as.data.frame()
+
+  # variable selection for M>100 ####
+  mock_W_101 <- matrix(rnorm(50*101), nrow = 50, ncol = 101) %>% as.data.frame()
+
+  # warning/error (tbd) when M>100 for pfer and kfwer, but not for fdr
+  for (et in c("pfer", "kfwer")) {
+
+    expect_no_warning(
+      variable.selections(
+        W = mock_W_ok,
+        error.type = et, level = 1,
+        k = list(kfwer = 1, pfer = NULL)[[et]]
+      )
+    )
+
+    expect_warning(
+      variable.selections(
+        W = mock_W_101,
+        error.type = et, level = 1,
+        k = list(kfwer = 1, pfer = NULL)[[et]]
+      )
+    )
+  }
+
+  # fdr: no error and returned object of class variable.selections
+  result_selection <- expect_no_condition(
+    variable.selections(
+      W = mock_W_101,
+      error.type = "fdr", level = 1
+    )
+  )
+  expect_s3_class(result_selection, "variable.selections")
+
+  # definition of k in variable.selections() ####
+  expect_no_warning(
+    variable.selections(
+      W = mock_W_ok,
+      error.type = "kfwer",
+      level = 1,
+      k = 1
+    )
+  )
+
+  # missing k in variable.selections() for kfwer should throw an error
+  expect_error(
+    variable.selections(
+      W = mock_W_ok,
+      error.type = "kfwer",
+      level = 1
+    )
+  )
+
+  # k defined with non-kfwer error.type should throw a message
+  expect_message(
+    variable.selections(
+      W = mock_W_ok,
+      error.type = "pfer",
+      level = 1,
+      k = 1
+    )
+  )
 
 })
 

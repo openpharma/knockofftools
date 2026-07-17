@@ -13,7 +13,11 @@
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric", binary "factor", or survival ("Surv") object.
 #' @param X data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.
 #' @param type should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.
-#' @param M the number of independent knockoff feature statistics that should be calculated.
+#' @param M the number of independent knockoff feature statistics that
+#' should be calculated.
+#' Note that in order to use the [variable.selection()] function with
+#' `error.type` "pfer" or "kfwer"
+#' only the first 100 iterations will be considered.
 #' @param knockoff.method what type of knockoffs to calculate. Defaults to sequential knockoffs, knockoff.method="seq", with other options: knockoff.method="sparseseq" and knockoff.method="mx".
 #' The "mx" method only works if all columns of the X matrix are continuous.
 #' @param statistic knockoff feature statistic function, defaults to glmnet coefficient difference (statistic="stat_glmnet"; see ?stat_glmnet). Other options include statistic="stat_random_forest" (see ?stat_random_forest), statistic="stat_predictive_glmnet" (see ?stat_predictive_glmnet) or statistic="stat_predictive_causal_forest" (see ?stat_predictive_causal_forest).
@@ -121,6 +125,15 @@ knockoff.statistics <- function(y, X, type="regression",
             " is not a predictive filter, hence the 'trt' variable",
             " will be ignored.")
   }
+
+  if (M>100) {
+    message(
+      "The number of knockoff iterations M is set to ", M, ".\n",
+      "Note that only the first 100 iterations will be considered in ",
+      "variable.selections() with error.type = 'pfer' or 'kfwer'."
+    )
+  }
+
 
   if (M==1) {
       W <- .knockoff.statistics.single(y, X, type=type,
@@ -778,6 +791,7 @@ selections_control_kFWER <- function(W, level, k) {
 #' @details Knockoffs is a randomized procedure which relies on the construction of synthetic (knockoff) variables.
 #' This function performs variable selection for multiple knockoffs and then stabilizes the selections by combining their outcomes.
 #' When the pfer or kfwer error is controlled the derandomizing knockoffs is used, which was introduced by Ret et al. (2021) and provably controls this errors.
+#' Note that the derandomizing knockoffs is only valid for M <= 100 iterations, so only the first 100 knockoffs (columns of `W`) are used for the selection process.
 #' When the fdr is controlled the heuristic multiple selection algorithm is used, which was introduced by Kormaksson et al. (2021).
 #'
 #' @return an object of class "variable.selections" that is essentially a list with two elements: 1) $selections = (p x M) binary data.frame where rows correspond to variables, and cols correspond to different knockoffs; a value of 1 means
@@ -814,19 +828,60 @@ selections_control_kFWER <- function(W, level, k) {
 #'
 #' @details Z. Ren, Y. Wei, & E. Candès, (2021). Derandomizing knockoffs. Journal of the American Statistical Association, 1-11.
 #' @details M. Kormaksson, L. J. Kelly, X. Zhu, S. Haemmerle, L. Pricop, & D. Ohlssen (2021). Sequential knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical trial pool. Statistics in Medicine, 40(14), 3313-3328.
-variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, thres=0.50) {
+variable.selections <- function(
+    W,
+    level = 0.20,
+    error.type = "fdr",
+    k = NULL,
+    thres = 0.50
+) {
+
+  error.type <- tolower(error.type)
+
   ## Check the type of error criterion
-  if(error.type %in% c("fdr","pfer","kfwer") == 0) stop("The error criterion is not supported!")
+  if(!error.type %in% c("fdr", "pfer", "kfwer")) stop("The error criterion is not supported!")
+
+  ## Check usage of k parameter
+  # (not defining k for M>1 results in NA value for level)
+  if (error.type == "kfwer" && is.null(k) && ncol(W) > 1) {
+    stop(
+      "Please specify the k parameter for k-FWER control.",
+      call. = FALSE
+    )
+  }
+  if (error.type != "kfwer" && !is.null(k)) {
+    message(
+      "The k parameter is only used for k-FWER control, ",
+      "but is specified for error.type = '", error.type,
+      "' and will be ignored.",
+      call. = FALSE
+    )
+  }
+
+  if (error.type %in% c("pfer","kfwer") && ncol(W) > 100) {
+    # TODO tbd: warning or error?
+    warning(
+      "For error.type = 'pfer' or 'kfwer', ",
+      "the number of knockoffs iterations (columns of W) should be less than ",
+      "100, but is ", ncol(W), ".\n",
+      "Only the first 100 knockoffs will be considered ",
+      "for the selection process.\n",
+      call. = FALSE
+    )
+
+    W <- W[,1:100]
+  }
 
   # Preprocessing
   p <- nrow(W)
   M <- ncol(W)
-  error.type <- tolower(error.type)
 
-  # Choose appropriate variable selection function (which.select) and in the case of "pfer" and "kfwer" adjust nomal level w.r.t. M and thres
+
+  # Choose appropriate variable selection function (which.select) and in the
+  # case of "pfer" and "kfwer" adjust nominal level w.r.t. M and thres
   if (error.type == "pfer") {
     which.select <- selections_control_PFER
-    ratio <-  find_ratio(M, thres)
+    ratio <- find_ratio(M, thres)
     level = level/ratio
   }
   if (error.type == "kfwer") {
@@ -841,7 +896,7 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   # Loop through W-statistics to generate the binary matrix of selections S
   S = matrix(0, p, M)
   for (i in 1:M) {
-    if ((error.type == "kfwer")&(M==1)) {
+    if ((error.type == "kfwer") & (M==1)) {
       S[which.select(W[,i], level = level, k = k),i] <- 1
     } else{
       S[which.select(W[,i], level = level),i] <- 1
@@ -849,7 +904,7 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   }
 
   # Perform the final selection
-  if (error.type == 'pfer'| error.type == 'kfwer') {
+  if (error.type == 'pfer' | error.type == 'kfwer') {
     selected_variables = which(rowMeans(S)>thres)
   } else if (error.type == 'fdr'){
     selected_variables = multi_select(S = S, trim = thres)
@@ -869,8 +924,10 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
 
 
 
-#' Select variables based on the heuristic multiple selection algorithm from Kormaksson et al. 'Sequential
-#' knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical
+#' Select variables based on the heuristic multiple selection algorithm
+#' from Kormaksson et al. 'Sequential
+#' knockoffs for continuous and categorical predictors: With application to
+#' a large psoriatic arthritis clinical
 #' trial pool.' Statistics in Medicine. 2021;1–16.
 #'
 #' @param S the binary matrix of selections
