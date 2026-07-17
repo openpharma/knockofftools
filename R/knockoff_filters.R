@@ -831,6 +831,22 @@ selections_control_kFWER <- function(W, level, k) {
 variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, thres=0.50) {
   ## Check the type of error criterion
   if(error.type %in% c("fdr","pfer","kfwer") == 0) stop("The error criterion is not supported!")
+  ## Check usage of k parameter
+  # (not defining k for M>1 results in NA value for level)
+  if (error.type == "kfwer" && is.null(k) && ncol(W) > 1) {
+    stop(
+      "Please specify the k parameter for k-FWER control.",
+      call. = FALSE
+    )
+  }
+  if (error.type != "kfwer" && !is.null(k)) {
+    message(
+      "The k parameter is only used for k-FWER control, ",
+      "but is specified for error.type = '", error.type,
+      "' and will be ignored.",
+      call. = FALSE
+    )
+  }
 
   if (error.type %in% c("pfer","kfwer") && ncol(W) > 100) {
     # TODO tbd: warning or error?
