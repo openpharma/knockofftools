@@ -828,9 +828,19 @@ selections_control_kFWER <- function(W, level, k) {
 #'
 #' @details Z. Ren, Y. Wei, & E. Candès, (2021). Derandomizing knockoffs. Journal of the American Statistical Association, 1-11.
 #' @details M. Kormaksson, L. J. Kelly, X. Zhu, S. Haemmerle, L. Pricop, & D. Ohlssen (2021). Sequential knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical trial pool. Statistics in Medicine, 40(14), 3313-3328.
-variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, thres=0.50) {
+variable.selections <- function(
+    W,
+    level = 0.20,
+    error.type = "fdr",
+    k = NULL,
+    thres = 0.50
+) {
+
+  error.type <- tolower(error.type)
+
   ## Check the type of error criterion
-  if(error.type %in% c("fdr","pfer","kfwer") == 0) stop("The error criterion is not supported!")
+  if(!error.type %in% c("fdr", "pfer", "kfwer")) stop("The error criterion is not supported!")
+
   ## Check usage of k parameter
   # (not defining k for M>1 results in NA value for level)
   if (error.type == "kfwer" && is.null(k) && ncol(W) > 1) {
@@ -865,9 +875,10 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   # Preprocessing
   p <- nrow(W)
   M <- ncol(W)
-  error.type <- tolower(error.type)
 
-  # Choose appropriate variable selection function (which.select) and in the case of "pfer" and "kfwer" adjust nomal level w.r.t. M and thres
+
+  # Choose appropriate variable selection function (which.select) and in the
+  # case of "pfer" and "kfwer" adjust nominal level w.r.t. M and thres
   if (error.type == "pfer") {
     which.select <- selections_control_PFER
     ratio <- find_ratio(M, thres)
@@ -913,8 +924,10 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
 
 
 
-#' Select variables based on the heuristic multiple selection algorithm from Kormaksson et al. 'Sequential
-#' knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical
+#' Select variables based on the heuristic multiple selection algorithm
+#' from Kormaksson et al. 'Sequential
+#' knockoffs for continuous and categorical predictors: With application to
+#' a large psoriatic arthritis clinical
 #' trial pool.' Statistics in Medicine. 2021;1–16.
 #'
 #' @param S the binary matrix of selections
