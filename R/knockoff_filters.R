@@ -13,7 +13,11 @@
 #' @param y response vector with \code{length(y) = nrow(X)}. Accepts "numeric", binary "factor", or survival ("Surv") object.
 #' @param X data.frame (or tibble) with "numeric" and "factor" columns only. The number of columns, ncol(X) needs to be > 2.
 #' @param type should be "regression" if y is numeric, "classification" if y is a binary factor variable or "survival" if y is a survival object.
-#' @param M the number of independent knockoff feature statistics that should be calculated.
+#' @param M the number of independent knockoff feature statistics that
+#' should be calculated.
+#' Note that in order to use the [variable.selection()] function with
+#' `error.type` "pfer" or "kfwer"
+#' only the first 100 iterations will be considered.
 #' @param knockoff.method what type of knockoffs to calculate. Defaults to sequential knockoffs, knockoff.method="seq", with other options: knockoff.method="sparseseq" and knockoff.method="mx".
 #' The "mx" method only works if all columns of the X matrix are continuous.
 #' @param statistic knockoff feature statistic function, defaults to glmnet coefficient difference (statistic="stat_glmnet"; see ?stat_glmnet). Other options include statistic="stat_random_forest" (see ?stat_random_forest), statistic="stat_predictive_glmnet" (see ?stat_predictive_glmnet) or statistic="stat_predictive_causal_forest" (see ?stat_predictive_causal_forest).
@@ -121,6 +125,15 @@ knockoff.statistics <- function(y, X, type="regression",
             " is not a predictive filter, hence the 'trt' variable",
             " will be ignored.")
   }
+
+  if (M>100) {
+    message(
+      "The number of knockoff iterations M is set to ", M, ".\n",
+      "Note that only the first 100 iterations will be considered in ",
+      "variable.selections() with error.type = 'pfer' or 'kfwer'."
+    )
+  }
+
 
   if (M==1) {
       W <- .knockoff.statistics.single(y, X, type=type,
