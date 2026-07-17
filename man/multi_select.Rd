@@ -2,8 +2,10 @@
 % Please edit documentation in R/knockoff_filters.R
 \name{multi_select}
 \alias{multi_select}
-\title{Select variables based on the heuristic multiple selection algorithm from Kormaksson et al. 'Sequential
-knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical
+\title{Select variables based on the heuristic multiple selection algorithm
+from Kormaksson et al. 'Sequential
+knockoffs for continuous and categorical predictors: With application to
+a large psoriatic arthritis clinical
 trial pool.' Statistics in Medicine. 2021;1–16.}
 \usage{
 multi_select(S, trim = 0.5)
@@ -17,8 +19,10 @@ multi_select(S, trim = 0.5)
 a single "most frequent" variable selection among the multiple selections in S.
 }
 \description{
-Select variables based on the heuristic multiple selection algorithm from Kormaksson et al. 'Sequential
-knockoffs for continuous and categorical predictors: With application to a large psoriatic arthritis clinical
+Select variables based on the heuristic multiple selection algorithm
+from Kormaksson et al. 'Sequential
+knockoffs for continuous and categorical predictors: With application to
+a large psoriatic arthritis clinical
 trial pool.' Statistics in Medicine. 2021;1–16.
 }
 \details{
