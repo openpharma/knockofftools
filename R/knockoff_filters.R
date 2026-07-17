@@ -778,6 +778,7 @@ selections_control_kFWER <- function(W, level, k) {
 #' @details Knockoffs is a randomized procedure which relies on the construction of synthetic (knockoff) variables.
 #' This function performs variable selection for multiple knockoffs and then stabilizes the selections by combining their outcomes.
 #' When the pfer or kfwer error is controlled the derandomizing knockoffs is used, which was introduced by Ret et al. (2021) and provably controls this errors.
+#' Note that the derandomizing knockoffs is only valid for M <= 100 iterations, so only the first 100 knockoffs (columns of `W`) are used for the selection process.
 #' When the fdr is controlled the heuristic multiple selection algorithm is used, which was introduced by Kormaksson et al. (2021).
 #'
 #' @return an object of class "variable.selections" that is essentially a list with two elements: 1) $selections = (p x M) binary data.frame where rows correspond to variables, and cols correspond to different knockoffs; a value of 1 means
@@ -818,6 +819,20 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   ## Check the type of error criterion
   if(error.type %in% c("fdr","pfer","kfwer") == 0) stop("The error criterion is not supported!")
 
+  if (error.type %in% c("pfer","kfwer") && ncol(W) > 100) {
+    # TODO tbd: warning or error?
+    warning(
+      "For error.type = 'pfer' or 'kfwer', ",
+      "the number of knockoffs iterations (columns of W) should be less than ",
+      "100, but is ", ncol(W), ".\n",
+      "Only the first 100 knockoffs will be considered ",
+      "for the selection process.\n",
+      call. = FALSE
+    )
+
+    W <- W[,1:100]
+  }
+
   # Preprocessing
   p <- nrow(W)
   M <- ncol(W)
@@ -826,7 +841,7 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   # Choose appropriate variable selection function (which.select) and in the case of "pfer" and "kfwer" adjust nomal level w.r.t. M and thres
   if (error.type == "pfer") {
     which.select <- selections_control_PFER
-    ratio <-  find_ratio(M, thres)
+    ratio <- find_ratio(M, thres)
     level = level/ratio
   }
   if (error.type == "kfwer") {
@@ -841,7 +856,7 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   # Loop through W-statistics to generate the binary matrix of selections S
   S = matrix(0, p, M)
   for (i in 1:M) {
-    if ((error.type == "kfwer")&(M==1)) {
+    if ((error.type == "kfwer") & (M==1)) {
       S[which.select(W[,i], level = level, k = k),i] <- 1
     } else{
       S[which.select(W[,i], level = level),i] <- 1
@@ -849,7 +864,7 @@ variable.selections <- function(W, level = 0.20, error.type = "fdr", k = NULL, t
   }
 
   # Perform the final selection
-  if (error.type == 'pfer'| error.type == 'kfwer') {
+  if (error.type == 'pfer' | error.type == 'kfwer') {
     selected_variables = which(rowMeans(S)>thres)
   } else if (error.type == 'fdr'){
     selected_variables = multi_select(S = S, trim = thres)
