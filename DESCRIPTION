@@ -31,9 +31,10 @@ Imports:
     magrittr (>= 1.5)
 RoxygenNote: 7.3.3
 Suggests: 
-    knitr,
-    rmarkdown,
     callr,
+    knitr,
+    ranger,
+    rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3

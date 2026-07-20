@@ -49,7 +49,7 @@ test_that("Basic tests of knockoff.statistics and variable.selections", {
 
   .check.V(W_M1, 1)
 
-  # Run the function with M=1
+  # Run the function with M=2
   W_M2 <- knockoff.statistics(y, X, M=2)
 
   .check.V(W_M2, 2)
@@ -83,7 +83,7 @@ test_that("Basic tests of knockoff.statistics and variable.selections", {
 
 })
 
-test_that("Basic tests for stat_glmnet and stat_random_forest", {
+test_that("Basic tests for stat_glmnet, stat_random_forest and stat_ranger", {
 
   set.seed(1)
 
@@ -114,9 +114,15 @@ test_that("Basic tests for stat_glmnet and stat_random_forest", {
              stat_glmnet(y=ys, X=X, X_k=X_k,
                          X.fixed= data.frame(AGE=rnorm(nrow(X), mean=50, sd=10)),
                          type="survival"),
+
              stat_random_forest(X, X_k, yg, type = "regression"),
              stat_random_forest(X, X_k, yb, type = "classification"),
-             stat_random_forest(X, X_k, ys, type = "survival"))
+             stat_random_forest(X, X_k, ys, type = "survival"),
+
+             stat_ranger(X, X_k, yg, type = "regression"),
+             stat_ranger(X, X_k, yb, type = "classification"),
+             stat_ranger(X, X_k, ys, type = "survival")
+             )
 
   .check.W <- function(W) {
     expect_equal(class(W), "data.frame")
@@ -243,6 +249,24 @@ test_that("Test different prognostic knockoff filters", {
   set.seed(6)
   .check.WandV(list(y=y_surv, X=X, type="survival", M=5,
                     statistic="stat_random_forest", trt=NULL,
+                    error.type = "pfer",level=1))
+
+  # Test stat_ranger for regression
+  set.seed(7)
+  .check.WandV(list(y=y_g, X=X, type="regression", M=5,
+                    statistic="stat_ranger", trt=NULL,
+                    error.type = "fdr",k = NULL, level = 0.2))
+
+  # Test stat_ranger for classification
+  set.seed(8)
+  .check.WandV(list(y=y_b, X=X, type="classification", M=5,
+                    statistic="stat_ranger", trt=NULL,
+                    error.type = "fdr",k = NULL, level = 0.25))
+
+  # Test stat_ranger for survival
+  set.seed(9)
+  .check.WandV(list(y=y_surv, X=X, type="survival", M=5,
+                    statistic="stat_ranger", trt=NULL,
                     error.type = "pfer",level=1))
 })
 
@@ -453,7 +477,6 @@ test_that("Expected errors and warnings", {
 
   # Expect same error when calling knockoff.statistics:
   expect_error(knockoff.statistics(y, X), "X should have ncol\\(X\\) > 2")
-
 
 })
 

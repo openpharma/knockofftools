@@ -378,6 +378,150 @@ stat_random_forest <- function(X, X_k, y, type = "regression",  ...) {
 }
 
 
+#' Construction helper for knockoff (feature) statistics
+#'
+#' The `stat_custom` function is a helper function that allows
+#' users to define their own knockoff feature statistics by simply
+#' providing a custom modeling and importance function.
+#' `stat_custom` takes care of swapping the original and knockoff variables
+#' before the custom computations which avoids bias introduction in the
+#' the knockoff statistics and corrects the sign of the computed statistics
+#' accordingly before returning them.
+#'
+#' @inheritParams stat_random_forest
+#' @param model_imp function that takes feature input X, the outcome y,
+#' outcome type (regression, classification, survival), and any additional
+#' parameters passed via `...`, fits a model, computes and returns
+#' a vector of variable importance scores.
+#' @param ... Other arguments to be passed to the underlying modeling or
+#' importance function from `model_imp`.
+#'
+#' @return data.frame with knockoff statistics W as column.
+#' The number of rows matches the number of columns (variables)
+#' of the data.frame X and the variable names are recorded in rownames(W).
+#'
+stat_custom <- function(
+    X,
+    X_k,
+    y,
+    type = c("regression", "classification", "survival"),
+    model_imp,
+    ...
+) {
+
+  # Input checks ####
+  check_design(X)
+  check_design(X_k)
+
+  type   <- match.arg(type)
+  dots   <- list(...)
+
+  # Swap columns of X and Xk ####
+  swap <- as.logical(stats::rbinom(ncol(X), 1, 0.5))
+  X_swap <- X
+  X_swap[, swap] <- X_k[, swap]
+  Xk_swap <- X_k
+  Xk_swap[, swap] <- X[, swap]
+
+  # Compute importances ####
+  var_split_imps <- do.call(
+    model_imp,
+    list(X = cbind(X_swap, Xk_swap), y = y, type = type, ...)
+  )
+
+  # Compute stats W ####
+  p <- ncol(X)
+  orig <- 1:p
+  W <- var_split_imps[orig] - var_split_imps[orig + p]
+
+  # Correct sign for swapping
+  W <- W * (1 - 2 * swap)
+
+  # Return a named vector W ####
+  data.frame(
+    W = W,
+    row.names = colnames(X)
+  )
+}
+
+
+
+
+# stat_ranger <- function(
+#     X,
+#     X_k,
+#     y,
+#     type = c("regression", "classification", "survival"),
+#     ...
+# ) {
+#
+#   # Check inputs
+#   check_design(X)
+#   check_design(X_k)
+#
+#   type <- match.arg(type)
+#   dots <- list(...)
+#
+#   # Randomly swap columns of X and Xk
+#   swap <- as.logical(stats::rbinom(ncol(X), 1, 0.5))
+#   X_swap <- X
+#   X_swap[, swap] <- X_k[, swap]
+#   Xk_swap <- X_k
+#   Xk_swap[, swap] <- X[, swap]
+#
+#   # compute importance scores for the combined data
+#   importance_score_args <- list(
+#     X = cbind(X_swap, Xk_swap),
+#     y = y,
+#     type = type
+#   ) %>%
+#     c(dots)
+#
+#   var_split_imps <- do.call(
+#     "ranger_importance_scores",
+#     importance_score_args
+#   )
+#
+#   # Compute knockoff statistics W
+#   p <- ncol(X)
+#   orig <- 1:p
+#   W <- var_split_imps[orig] - var_split_imps[orig + p]
+#
+#   # Correct for swapping of columns of X and Xk
+#   W <- W * (1 - 2 * swap)
+#
+#   # Return a named vector (with variable names)
+#   data.frame(
+#     W = W,
+#     row.names = colnames(X)
+#   )
+#
+# }
+
+#' Knockoff (feature) statistics: Random forest (ranger)
+#'
+#' This function uses the `{ranger}` package to estimate
+#' permutation importance scores from random forest (ranger).
+#'
+#' @inheritParams stat_random_forest
+#' @param ... other parameters passed to \code{ranger::ranger()}
+#' controlling modelling and the importance metric.
+#' @seealso \code{\link[knockofftools]{stat_random_forest}}
+#' @return  data.frame with knockoff statistics W as column.
+#' The number of rows matches the number of columns (variables) of the
+#' data.frame X and the variable names are recorded in `rownames(W)`.
+#' @export
+#'
+stat_ranger <- function(X, X_k, y, type, ...) {
+  stat_custom(
+    X = X, X_k = X_k, y = y, type = type,
+    model_imp = "ranger_importance_scores",
+    ...
+  )
+}
+#  purrr::partial(stat_custom, model_imp = "ranger_importance_scores")
+
+
 #' Knockoff (feature) statistics that captues the predictive strength: Absolute coefficient differences between treatment original variables interaction terms and treatment knockoff variables interaction terms
 #'
 #' This function follows the implementation of the stat_glmnet function, but modifies it to focus on the coefficients of the interaction terms with the treatment.
@@ -649,7 +793,6 @@ stat_predictive_causal_forest <- function(X, X_k, y, trt, type = "regression", .
   return(W_predictive.dataframe)
 
 }
-
 
 
 
