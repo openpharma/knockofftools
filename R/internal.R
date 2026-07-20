@@ -88,32 +88,6 @@ check_normality <- function(X) {
 
 }
 
-check_survival_installed <- function() {
-
-  if (!requireNamespace("survival", quietly = TRUE)) {
-
-    # imitate {cli} style for error message:
-    red_bold <- "\033[1;31m"
-    blue     <- "\033[34m"
-    grey     <- "\033[90m"
-    reset    <- "\033[0m"
-
-    stop(
-      paste0(
-        "\n",
-        red_bold, "! ", reset,
-        "The ", blue, "survival", reset,
-        " package is required for `type = \"survival\"`.\n",
-        blue, "i ", reset,
-        grey, "Install it with `install.packages(\"survival\")`.", reset
-      ),
-      call. = FALSE
-    )
-  }
-}
-
-
-
 #' Select variables based on (heuristic) mode of multiple variable selections
 #'
 #' Do not call this function on its own
@@ -267,7 +241,6 @@ ranger_importance_scores <- function(
 ) {
 
   type <- match.arg(type)
-  if (type == "survival") check_survival_installed()
 
   dots <- list(...) %>%
     {.[intersect(names(.), formalArgs(ranger::ranger))]} %>%
@@ -310,7 +283,7 @@ ranger_importance_scores <- function(
 
   # recompute if any importances could not be computed (NaN)
   recompute_count <- 0
-  while(recompute_count <= max_retry) {
+  while (recompute_count <= max_retry) {
 
     if (!any(is.nan(imps))) break
 
